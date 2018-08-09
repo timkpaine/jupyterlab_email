@@ -49,6 +49,9 @@ const extension: JupyterLabPlugin<void> = {
 class SendEmailWidget extends Widget {
   constructor(accounts: string[] = [], hide_code:boolean = false, account_name:string) {
     let body = document.createElement('div');
+    body.style.display = 'flex';
+    body.style.flexDirection = 'column';
+
     let default_none = document.createElement('option');
     default_none.selected = false;
     default_none.disabled = true;
@@ -67,6 +70,8 @@ class SendEmailWidget extends Widget {
         option.selected = true;
       }
     }
+    type.style.marginBottom = '15px';
+    type.style.minHeight = '25px';
     body.appendChild(type);
 
     let code = document.createElement('select');
@@ -81,6 +86,8 @@ class SendEmailWidget extends Widget {
         option.selected = true;
       }
     }
+    code.style.marginBottom = '15px';
+    code.style.minHeight = '25px';
     body.appendChild(code);
 
     if(accounts.length > 0){
@@ -95,11 +102,14 @@ class SendEmailWidget extends Widget {
           option.selected = true;
         }
       }
+      account.style.marginBottom = '15px';
+      account.style.minHeight = '25px';
       body.appendChild(account);
     }
 
     let to = document.createElement('textarea');
     to.placeholder = 'list,of,emails, default is to self';
+    to.style.marginBottom = '15px';
     body.appendChild(to);
 
     let subject = document.createElement('textarea');
@@ -112,8 +122,13 @@ class SendEmailWidget extends Widget {
   public getCode(): string {
     return this.codeNode.value;
   }
+
   public getEmail(): string {
     return this.emailNode.value;
+  }
+
+  public getType(): string {
+    return this.typeNode.value;
   }
 
   public getTo(): string {
@@ -124,11 +139,17 @@ class SendEmailWidget extends Widget {
     return this.subjectNode.value;
   }
 
-  get codeNode(): HTMLSelectElement {
+
+  get typeNode(): HTMLSelectElement {
     return this.node.getElementsByTagName('select')[0] as HTMLSelectElement;
   }
-  get emailNode(): HTMLSelectElement {
+
+  get codeNode(): HTMLSelectElement {
     return this.node.getElementsByTagName('select')[1] as HTMLSelectElement;
+  }
+
+  get emailNode(): HTMLSelectElement {
+    return this.node.getElementsByTagName('select')[2] as HTMLSelectElement;
   }
   get toNode(): HTMLTextAreaElement {
     return this.node.getElementsByTagName('textarea')[0] as HTMLTextAreaElement;
@@ -137,7 +158,6 @@ class SendEmailWidget extends Widget {
     return this.node.getElementsByTagName('textarea')[1] as HTMLTextAreaElement;
   }
 }
-
 
 
 function activate(app: JupyterLab,
@@ -152,6 +172,7 @@ function activate(app: JupyterLab,
   let all_emails1: string[] = [];
   let all_emails2: string[] = [];
   let all_accounts: string[] = [];
+  let all_templates: string[] = [];
 
   // grab templates from serverextension
   var xhr = new XMLHttpRequest();
@@ -159,8 +180,13 @@ function activate(app: JupyterLab,
   xhr.onload = function (e:any) {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
-        let emails = JSON.parse(xhr.responseText);
-        for (let email of emails){
+        let info = JSON.parse(xhr.responseText);
+
+        for (let template of info['templates']){
+          all_templates.push(template);
+        }
+
+        for (let email of info['emails']){
 
         let command1 = 'send-email:' + email;
         let command2 = 'send-email-nocode:' + email;
@@ -171,7 +197,12 @@ function activate(app: JupyterLab,
         let send_widget = new SendEmailWidget(all_accounts,false, email);
         app.commands.addCommand(command1, {
           label: command1,
-          isEnabled: () => true,
+          isEnabled: () => {
+            if (app.shell.currentWidget && docManager.contextForWidget(app.shell.currentWidget) && docManager.contextForWidget(app.shell.currentWidget).model){
+              return true;
+            } 
+            return false;
+          },
           execute: () => {
             showDialog({
                 title: 'Send email:',
@@ -186,6 +217,7 @@ function activate(app: JupyterLab,
                 let folder = browser.defaultBrowser.model.path || '';
                 const context = docManager.contextForWidget(app.shell.currentWidget);
 
+                let type = send_widget.getType();
                 let email = send_widget.getEmail();
                 let code = send_widget.getCode();
                 let to = send_widget.getTo();
@@ -211,6 +243,7 @@ function activate(app: JupyterLab,
                       } else {
                         showDialog({
                             title: 'Something went wrong!',
+                            body: 'Check the Jupyter logs for the exception.',
                             buttons: [Dialog.okButton({ label: 'Ok' })]
                           }).then(() => {resolve();})
                       }
@@ -219,6 +252,7 @@ function activate(app: JupyterLab,
                   xhr.send(JSON.stringify({'folder': folder,
                                            'path': path,
                                            'model': model,
+                                           'type': type,
                                            'email': email,
                                            'code': code,
                                            'subject': subject,
@@ -231,7 +265,12 @@ function activate(app: JupyterLab,
 
           app.commands.addCommand(command2, {
           label: command2,
-          isEnabled: () => true,
+          isEnabled: () => {
+            if (app.shell.currentWidget && docManager.contextForWidget(app.shell.currentWidget) && docManager.contextForWidget(app.shell.currentWidget).model){
+              return true;
+            } 
+            return false;
+          },
           execute: () => {
             showDialog({
                 title: 'Send email:',

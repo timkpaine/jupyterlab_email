@@ -1,5 +1,6 @@
 ((= IPython input/output style =))
 ((*- extends 'base.tplx' -*))
+\begin{document}
 
 %===============================================================================
 % Latex Article
@@ -73,3 +74,6 @@
 ((( text | add_prompts(first='', cont=indention) )))
 \end{Verbatim}
 ((*- endmacro *))
+
+\end{document}
+

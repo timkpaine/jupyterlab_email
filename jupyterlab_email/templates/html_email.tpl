@@ -148,11 +148,10 @@
 
 {{ super() }}
 {% endblock header %}
+
 {% block body %}
 <body>
-<div class="header"></div>
 {{ super() }}
-<div class="footer"></div>
 </body>
 {% endblock body %}
 
@@ -163,6 +162,9 @@
 {%- endblock codecell %}
 
 {% block input_group -%}
+<div class="input">
+{{ super() }}
+</div>
 {% endblock input_group %}
 
 {% block output_group %}
@@ -174,19 +176,39 @@
 {% endblock output_group %}
 
 {% block in_prompt -%}
+<div class="prompt input_prompt">
+</div>
 {%- endblock in_prompt %}
 
 {% block empty_in_prompt -%}
+<div class="prompt input_prompt">
+</div>
 {%- endblock empty_in_prompt %}
 
 {% block output_prompt %}
 {% endblock output_prompt %}
 
 {% block input %}
+<div class="inner_cell">
+    <div class="input_area">
+{{ cell.source | highlight_code(metadata=cell.metadata) }}
+    </div>
+</div>
 {%- endblock input %}
 
 
 {% block output_area_prompt %}
+{%- if output.output_type == 'execute_result' -%}
+    <div class="prompt output_prompt">
+    {%- if cell.execution_count is defined -%}
+        Out[{{ cell.execution_count|replace(None, "&nbsp;") }}]:
+    {%- else -%}
+        Out[&nbsp;]:
+    {%- endif -%}
+{%- else -%}
+    <div class="prompt">
+{%- endif -%}
+    </div>
 {% endblock output_area_prompt %}
 
 {% block output %}
