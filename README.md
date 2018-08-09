@@ -6,6 +6,7 @@ A jupyterlab extension to email notebooks from the browser.
 [![PyPI](https://img.shields.io/pypi/v/jupyterlab_email.svg)](https://pypi.python.org/pypi/jupyterlab_email)
 [![npm](https://img.shields.io/npm/v/jupyterlab_email.svg)](https://www.npmjs.com/package/jupyterlab_email)
 
+![](https://raw.githubusercontent.com/timkpaine/jupyterlab_email/master/docs/example.gif)
 
 
 ## Install
