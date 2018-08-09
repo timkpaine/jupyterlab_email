@@ -1,3 +1,4 @@
+import emails
 import json
 from getpass import getpass
 from notebook.base.handlers import IPythonHandler
@@ -8,21 +9,33 @@ class EmailHandler(IPythonHandler):
     def initialize(self, emails=None):
         self.emails = emails
 
-    def get(self):
-        email = self.get_argument('email', '')
-        if email in self.emails:
-            res = self.emails[email](self.request)
-            self.finish(res)
-        else:
-            self.finish('')
-
     def post(self):
-        email = self.get_argument('email', '')
-        if email in self.emails:
-            res = self.emails[email](self.request)
-            self.finish(res)
-        else:
-            self.finish('')
+        body = json.loads(self.request.body)
+        email = body.get('email', '')
+        code = body.get('code', False)
+        to = body.get('to', '')
+        subject = body.get('subject', '')
+        print('\n\n\n\n\n')
+        print(email)
+        print('\n\n\n\n\n')
+        print(self.emails)
+        for account in self.emails:
+            if account['name'] == email:
+                if not to:
+                    to = account['username'] + '@' + account['domain']
+                else:
+                    to = to.split(',')
+
+                message = emails.html(subject=subject, html='<div>test</div>', mail_from=account['username'] + '@' + account['domain'])
+                r = message.send(to=to,
+                                 smtp={'host': account['smtp'],
+                                       'port': account['port'],
+                                       'ssl': True,
+                                       'user': account['username'],
+                                       'password': account['password']})
+                self.finish(str(r))
+                return
+        raise Exception('Email not found!')
 
 
 class EmailsListHandler(IPythonHandler):
@@ -54,6 +67,6 @@ def load_jupyter_server_extension(nb_server_app):
         if 'password' in k:
             print('WARNING!!! You should not store your password in jupyter_notebook_config.py!!!')
         else:
-            k['password'] = getpass('Input password for %s@%s' % (k['username'], k['name']))
+            k['password'] = getpass('Input password for %s@%s:' % (k['username'], k['name']))
     web_app.add_handlers(host_pattern, [(url_path_join(base_url, 'email/get'), EmailsListHandler, {'emails': emails})])
     web_app.add_handlers(host_pattern, [(url_path_join(base_url, 'email/run'), EmailHandler, {'emails': emails})])

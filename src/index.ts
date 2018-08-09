@@ -30,6 +30,10 @@ import {
   IMainMenu
 } from '@jupyterlab/mainmenu';
 
+import {
+  Widget
+} from '@phosphor/widgets';
+
 import '../style/index.css';
 
 const extension: JupyterLabPlugin<void> = {
@@ -39,6 +43,90 @@ const extension: JupyterLabPlugin<void> = {
   optional: [ILauncher],
   activate: activate
 };
+
+
+
+class SendEmailWidget extends Widget {
+  constructor(accounts: string[] = [], hide_code:boolean = false, account_name:string) {
+    let body = document.createElement('div');
+    let code = document.createElement('select');
+    let default_none = document.createElement('option');
+    default_none.selected = false;
+    default_none.disabled = true;
+    default_none.hidden = false;
+    default_none.style.display = 'none';
+    default_none.value = '';
+
+    code.appendChild(default_none);
+    for(let x of ['Code', 'No code']){
+      let option = document.createElement('option');
+      option.value = x
+      option.textContent = x;
+      code.appendChild(option);
+
+      if (hide_code && x === 'No code'){
+        option.selected = true;
+      }
+    }
+
+    body.appendChild(code);
+
+    if(accounts.length > 0){
+      let account = document.createElement('select');
+      account.appendChild(default_none);
+      for(let x of accounts){
+        let option = document.createElement('option');
+        option.value = x
+        option.textContent = x;
+        account.appendChild(option);
+        if(x === account_name){
+          option.selected = true;
+        }
+      }
+
+      body.appendChild(account);
+    }
+
+    let to = document.createElement('textarea');
+    to.placeholder = 'list,of,emails, default is to self';
+    body.appendChild(to);
+
+    let subject = document.createElement('textarea');
+    subject.placeholder = 'Subject of email';
+    body.appendChild(subject);
+
+    super({ node: body });
+  }
+
+  public getCode(): string {
+    return this.codeNode.value;
+  }
+  public getEmail(): string {
+    return this.emailNode.value;
+  }
+
+  public getTo(): string {
+    return this.toNode.value;
+  }
+
+  public getSubject(): string {
+    return this.subjectNode.value;
+  }
+
+  get codeNode(): HTMLSelectElement {
+    return this.node.getElementsByTagName('select')[0] as HTMLSelectElement;
+  }
+  get emailNode(): HTMLSelectElement {
+    return this.node.getElementsByTagName('select')[1] as HTMLSelectElement;
+  }
+  get toNode(): HTMLTextAreaElement {
+    return this.node.getElementsByTagName('textarea')[0] as HTMLTextAreaElement;
+  }
+  get subjectNode(): HTMLTextAreaElement {
+    return this.node.getElementsByTagName('textarea')[1] as HTMLTextAreaElement;
+  }
+}
+
 
 
 function activate(app: JupyterLab,
@@ -52,6 +140,7 @@ function activate(app: JupyterLab,
   let commands = app.commands;
   let all_emails1: string[] = [];
   let all_emails2: string[] = [];
+  let all_accounts: string[] = [];
 
   // grab templates from serverextension
   var xhr = new XMLHttpRequest();
@@ -62,72 +151,80 @@ function activate(app: JupyterLab,
         let emails = JSON.parse(xhr.responseText);
         for (let email of emails){
 
-        let command1 = 'email:' + email['name'];
-        let command2 = 'nocode:' + email['name'];
+        let command1 = 'send-email:' + email['name'];
+        let command2 = 'send-email-nocode:' + email['name'];
+        all_accounts.push(email['name']);
         all_emails1.push(command1);
         all_emails2.push(command2);
 
+        let send_widget = new SendEmailWidget(all_accounts,false, email['name']);
         app.commands.addCommand(command1, {
           label: command1,
           isEnabled: () => true,
           execute: () => {
             showDialog({
                 title: 'Send email:',
-                body: '',
+                body: send_widget,
                 // focusNodeSelector: 'input',
                 buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Ok' })]
               }).then(result => {
                 if (result.button.label === 'CANCEL') {
                   return;
                 }
-                // let folder = browser.defaultBrowser.model.path || '';
-                // const widget = app.shell.currentWidget;
-                // const context = docManager.contextForWidget(app.shell.currentWidget);
 
-                // let path = '';
-                // let model = {};
-                // if(context){
-                //   path = context.path; 
-                //   model = context.model.toJSON();
-                // }
+                let folder = browser.defaultBrowser.model.path || '';
+                const context = docManager.contextForWidget(app.shell.currentWidget);
 
-                // console.log(widget);
-                // console.log(context);
+                let email = send_widget.getEmail();
+                let code = send_widget.getCode();
+                let to = send_widget.getTo();
+                let subject = send_widget.getSubject();
 
-                // return new Promise(function(resolve) {
-                //   var xhr = new XMLHttpRequest();
-                //   xhr.open("POST", PageConfig.getBaseUrl() + "commands/run?command=" + encodeURI(command), true);
-                //   xhr.onload = function (e:any) {
-                //     if (xhr.readyState === 4) {
-                //       if (xhr.status === 200) {
-                //         showDialog({
-                //             title: 'Execute ' + command + ' succeeded',
-                //             // body: '',
-                //             // focusNodeSelector: 'input',
-                //             buttons: [Dialog.okButton({ label: 'Ok' })]
-                //           }).then(() => {resolve();})
-                //       } else {
-                //         showDialog({
-                //             title: 'Execute ' + command + ' failed',
-                //             // body: '',
-                //             // focusNodeSelector: 'input',
-                //             buttons: [Dialog.okButton({ label: 'Ok' })]
-                //           }).then(() => {resolve();})
-                //       }
-                //     }
-                //   };
-                //   xhr.send(JSON.stringify({'folder': folder, 'path': path, 'model': model}));
-                // });
+                let path = '';
+                let model = {};
+                if(context){
+                  path = context.path; 
+                  model = context.model.toJSON();
+                }
+
+                return new Promise(function(resolve) {
+                  var xhr = new XMLHttpRequest();
+                  xhr.open("POST", PageConfig.getBaseUrl() + "email/run", true);
+                  xhr.onload = function (e:any) {
+                    if (xhr.readyState === 4) {
+                      if (xhr.status === 200) {
+                        showDialog({
+                            title: 'Mail sent!',
+                            buttons: [Dialog.okButton({ label: 'Ok' })]
+                          }).then(() => {resolve();})
+                      } else {
+                        showDialog({
+                            title: 'Something went wrong!',
+                            buttons: [Dialog.okButton({ label: 'Ok' })]
+                          }).then(() => {resolve();})
+                      }
+                    }
+                  };
+                  xhr.send(JSON.stringify({'folder': folder,
+                                           'path': path,
+                                           'model': model,
+                                           'email': email,
+                                           'code': code,
+                                           'subject': subject,
+                                           'to': to
+                                         }));
+                });
               });
             }
           });
+
           app.commands.addCommand(command2, {
           label: command2,
           isEnabled: () => true,
           execute: () => {
             showDialog({
                 title: 'Send email:',
-                body: '',
+                body: new SendEmailWidget(all_accounts, true, email['name']),
                 // focusNodeSelector: 'input',
                 buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Ok' })]
               }).then(result => {
