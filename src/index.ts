@@ -49,7 +49,6 @@ const extension: JupyterLabPlugin<void> = {
 class SendEmailWidget extends Widget {
   constructor(accounts: string[] = [], hide_code:boolean = false, account_name:string) {
     let body = document.createElement('div');
-    let code = document.createElement('select');
     let default_none = document.createElement('option');
     default_none.selected = false;
     default_none.disabled = true;
@@ -57,6 +56,20 @@ class SendEmailWidget extends Widget {
     default_none.style.display = 'none';
     default_none.value = '';
 
+    let type = document.createElement('select');
+    for(let x of ['Email', 'HTML Attachment', 'PDF Attachment']){
+      let option = document.createElement('option');
+      option.value = x
+      option.textContent = x;
+      type.appendChild(option);
+
+      if (x === 'Email'){
+        option.selected = true;
+      }
+    }
+    body.appendChild(type);
+
+    let code = document.createElement('select');
     code.appendChild(default_none);
     for(let x of ['Code', 'No code']){
       let option = document.createElement('option');
@@ -68,7 +81,6 @@ class SendEmailWidget extends Widget {
         option.selected = true;
       }
     }
-
     body.appendChild(code);
 
     if(accounts.length > 0){
@@ -83,7 +95,6 @@ class SendEmailWidget extends Widget {
           option.selected = true;
         }
       }
-
       body.appendChild(account);
     }
 
@@ -151,13 +162,13 @@ function activate(app: JupyterLab,
         let emails = JSON.parse(xhr.responseText);
         for (let email of emails){
 
-        let command1 = 'send-email:' + email['name'];
-        let command2 = 'send-email-nocode:' + email['name'];
-        all_accounts.push(email['name']);
+        let command1 = 'send-email:' + email;
+        let command2 = 'send-email-nocode:' + email;
+        all_accounts.push(email);
         all_emails1.push(command1);
         all_emails2.push(command2);
 
-        let send_widget = new SendEmailWidget(all_accounts,false, email['name']);
+        let send_widget = new SendEmailWidget(all_accounts,false, email);
         app.commands.addCommand(command1, {
           label: command1,
           isEnabled: () => true,
@@ -224,7 +235,7 @@ function activate(app: JupyterLab,
           execute: () => {
             showDialog({
                 title: 'Send email:',
-                body: new SendEmailWidget(all_accounts, true, email['name']),
+                body: new SendEmailWidget(all_accounts, true, email),
                 // focusNodeSelector: 'input',
                 buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Ok' })]
               }).then(result => {
@@ -260,11 +271,12 @@ function activate(app: JupyterLab,
 
             menu.addItem({type: 'submenu', submenu: menu1});
             menu.addItem({type: 'submenu', submenu: menu2});
+
+            if (mainMenu) {
+              mainMenu.fileMenu.addGroup([{ type:'submenu', submenu: menu }], 11);
+            }
           });
 
-          if (mainMenu) {
-            mainMenu.fileMenu.addGroup([{ type:'submenu', submenu: menu }], 11);
-          }
 
         }
 

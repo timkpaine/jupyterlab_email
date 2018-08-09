@@ -20,6 +20,7 @@ install the server extension, and add the following to `jupyter_notebook_config.
 
 ```python3
 c.JupyterLabEmail.smtp_servers = [{'name': 'gmail',
+                                   'domain': 'gmail.com',
                                    'username': '<YOUR USERNAME>',
                                    'smtp': 'smtp.gmail.com',
                                    'port': 465}]

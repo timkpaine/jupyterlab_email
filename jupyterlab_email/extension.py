@@ -12,9 +12,10 @@ class EmailHandler(IPythonHandler):
     def post(self):
         body = json.loads(self.request.body)
         email = body.get('email', '')
-        code = body.get('code', False)
+        code = body.get('code', 'Code')
         to = body.get('to', '')
         subject = body.get('subject', '')
+        type = body.get('type', 'Email')
         print('\n\n\n\n\n')
         print(email)
         print('\n\n\n\n\n')
@@ -43,7 +44,7 @@ class EmailsListHandler(IPythonHandler):
         self.emails = emails
 
     def get(self):
-        self.finish(json.dumps(self.emails))
+        self.finish(json.dumps([x['name'] for x in self.emails]))
 
 
 def load_jupyter_server_extension(nb_server_app):
@@ -66,6 +67,8 @@ def load_jupyter_server_extension(nb_server_app):
     for k in emails:
         if 'password' in k:
             print('WARNING!!! You should not store your password in jupyter_notebook_config.py!!!')
+        elif 'function' in k:
+            print('Skipping password input for %s@%s' % (k['username'], k['name']))
         else:
             k['password'] = getpass('Input password for %s@%s:' % (k['username'], k['name']))
     web_app.add_handlers(host_pattern, [(url_path_join(base_url, 'email/get'), EmailsListHandler, {'emails': emails})])
