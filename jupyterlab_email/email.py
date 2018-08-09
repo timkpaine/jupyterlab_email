@@ -48,15 +48,13 @@ def email(path, model, type, template, code, to, subject, username, password, do
                 continue
 
             imgs_to_attach[img.get('cell_id') + '_' + str(i) + '.png'] = base64.b64decode(img.get('localdata'))
-            img['src'] = img.get('cell_id') + '_' + str(i) + '.png'
+            img['src'] = 'cid:' + img.get('cell_id') + '_' + str(i) + '.png'
             # encoders.encode_base64(part)
             del img['localdata']
 
         soup = str(soup)
         message = emails.html(charset='utf-8', subject=subject, html=soup, mail_from=username + '@' + domain)
         # message = emails.html(subject=subject, html=soup.encode('utf-8'), mail_from=username + '@' + domain)
-        print(soup)
-        print(soup[4525:4575])
         for name, data in iteritems(imgs_to_attach):
             message.attach(filename=name, content_disposition="inline", data=data)
 
@@ -64,18 +62,12 @@ def email(path, model, type, template, code, to, subject, username, password, do
         message = emails.html(subject=subject, html='<html></html>', mail_from=username + '@' + domain)
         message.attach(filename=name + '.' + to, content_disposition="inline", data=nb)
 
-    print('\n\n\n\n\n')
-    print(to)
-    print('\n\n\n\n\n')
     r = message.send(to=to,
                      smtp={'host': host,
                            'port': port,
                            'ssl': True,
                            'user': username,
                            'password': password})
-    print('\n\n\n\n\n')
-    print(r)
     if r.status_code != 250:
         raise Exception('Email exception! Check username and password')
-    print('\n\n\n\n\n')
     return r

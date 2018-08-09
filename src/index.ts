@@ -312,6 +312,7 @@ function activate(app: JupyterLab,
             menu.addItem({type: 'submenu', submenu: menu2});
 
             if (mainMenu) {
+              console.log('adding submenu');
               mainMenu.fileMenu.addGroup([{ type:'submenu', submenu: menu }], 11);
             }
           });

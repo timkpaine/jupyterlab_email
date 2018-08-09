@@ -28,9 +28,6 @@ class EmailHandler(IPythonHandler):
         path = os.path.join(os.getcwd(), body.get('path'))
         model = body.get('model')
 
-        print(email, code, to, subject, type, template)
-        print(self.emails)
-
         for account in self.emails:
             if account['name'] == email:
                 if not to:
