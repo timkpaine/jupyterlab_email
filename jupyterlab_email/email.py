@@ -59,10 +59,8 @@ def email(path, model, type, template, code, to, subject, username, password, do
             message.attach(filename=name, content_disposition="inline", data=data)
 
     else:
-        message = emails.html(subject=subject, html='<html>Attachmend: %s.%s</html>' % (name, to), mail_from=username + '@' + domain)
-        print('name' + '.' + to)
-        print(nb)
-        message.attach(filename=name + '.' + to, data=nb)
+        message = emails.html(subject=subject, html='<html>Attachmend: %s.%s</html>' % (name, type_to), mail_from=username + '@' + domain)
+        message.attach(filename=name + '.' + type_to, data=nb)
 
     r = message.send(to=to,
                      smtp={'host': host,
