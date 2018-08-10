@@ -159,7 +159,6 @@ class SendEmailWidget extends Widget {
   }
 }
 
-
 function activate(app: JupyterLab,
                   docManager: IDocumentManager,
                   palette: ICommandPalette,
@@ -173,20 +172,15 @@ function activate(app: JupyterLab,
   let all_emails2: string[] = [];
   let all_accounts: string[] = [];
   let all_templates: string[] = [];
-
   let loaded = false;
 
   // grab templates from serverextension
   var xhr = new XMLHttpRequest();
   xhr.open("GET", PageConfig.getBaseUrl() + "email/get", true);
+
   xhr.onload = function (e:any) {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
-        if (loaded){
-          return;
-        }
-        loaded = true;
-
         let info = JSON.parse(xhr.responseText);
 
         for (let template of info['templates']){
@@ -318,8 +312,9 @@ function activate(app: JupyterLab,
             menu.addItem({type: 'submenu', submenu: menu1});
             menu.addItem({type: 'submenu', submenu: menu2});
 
-            if (mainMenu) {
+            if (mainMenu && !loaded) {
               console.log('adding submenu');
+              loaded = true;
               mainMenu.fileMenu.addGroup([{ type:'submenu', submenu: menu }], 11);
             }
           });

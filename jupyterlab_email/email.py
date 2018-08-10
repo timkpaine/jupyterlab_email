@@ -59,8 +59,10 @@ def email(path, model, type, template, code, to, subject, username, password, do
             message.attach(filename=name, content_disposition="inline", data=data)
 
     else:
-        message = emails.html(subject=subject, html='<html></html>', mail_from=username + '@' + domain)
-        message.attach(filename=name + '.' + to, content_disposition="inline", data=nb)
+        message = emails.html(subject=subject, html='<html>Attachmend: %s.%s</html>' % (name, to), mail_from=username + '@' + domain)
+        print('name' + '.' + to)
+        print(nb)
+        message.attach(filename=name + '.' + to, data=nb)
 
     r = message.send(to=to,
                      smtp={'host': host,
@@ -69,5 +71,6 @@ def email(path, model, type, template, code, to, subject, username, password, do
                            'user': username,
                            'password': password})
     if r.status_code != 250:
+        print(r)
         raise Exception('Email exception! Check username and password')
     return r
