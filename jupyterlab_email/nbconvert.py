@@ -14,7 +14,11 @@ def run(to='html', name='', in_='', template='', execute=False, execute_timeout=
         fp.write(in_)
 
     # output file name
-    outname = name.rsplit('.', 1)[0] + '.' + to
+    outname = name.rsplit('.', 1)[0]
+
+    # hack for pdfs
+    if to != 'pdf':
+        outname += '.' + to
 
     # assemble nbconvert command
     argv = []
@@ -34,6 +38,11 @@ def run(to='html', name='', in_='', template='', execute=False, execute_timeout=
     try:
         subprocess.call(argv)
         outname = os.path.join(_dir, outname)
+
+        # hack for pdfs
+        if to == 'pdf':
+            outname += '.' + to
+
         with open(outname, 'rb') as fp:
             ret = fp.read()
 

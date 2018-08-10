@@ -20,11 +20,28 @@ class EmailHandler(IPythonHandler):
         type = body.get('type', 'Email')
         template = body.get('type')
 
-        if template in self.templates:
-            template = self.templates[template]
+        if type == 'Email':
+            if code == 'Code':
+                template = self.templates['email']
+            else:
+                template = self.templates['email_nocode']
+        elif type == 'HTML Attachment':
+            if code == 'Code':
+                template = ''
+            else:
+                template = self.templates['html_nocode']
+        elif type == 'PDF Attachment':
+            if code == 'Code':
+                template = ''
+            else:
+                template = self.templates['pdf_nocode']
         else:
-            template = self.templates['email']
+            if template in self.templates:
+                template = self.templates[template]
+            else:
+                template = self.templates['email']
 
+        print('converting to <%s> with temlate <%s>' % (type, template))
         path = os.path.join(os.getcwd(), body.get('path'))
         model = body.get('model')
 

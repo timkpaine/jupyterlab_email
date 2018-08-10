@@ -61,6 +61,7 @@ def email(path, model, type, template, code, to, subject, username, password, do
     else:
         message = emails.html(subject=subject, html='<html>Attachmend: %s.%s</html>' % (name, type_to), mail_from=username + '@' + domain)
         message.attach(filename=name + '.' + type_to, data=nb)
+        print(nb)
 
     r = message.send(to=to,
                      smtp={'host': host,
