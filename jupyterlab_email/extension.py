@@ -35,6 +35,7 @@ def load_jupyter_server_extension(nb_server_app):
     context['templates'] = {}
     context['templates']['email'] = os.path.join(os.path.dirname(__file__), 'templates', 'html_email.tpl')
     context['templates']['email_nocode'] = os.path.join(os.path.dirname(__file__), 'templates', 'hide_code_cells_html_email.tpl')
+    context['templates']['html'] = os.path.join(os.path.dirname(__file__), 'templates', 'html.tpl')
     context['templates']['html_nocode'] = os.path.join(os.path.dirname(__file__), 'templates', 'hide_code_cells_html.tpl')
     context['templates']['pdf_nocode'] = os.path.join(os.path.dirname(__file__), 'templates', 'hide_code_cells_pdf.tplx')
 

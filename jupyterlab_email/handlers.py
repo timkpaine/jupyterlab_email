@@ -27,7 +27,7 @@ class EmailHandler(IPythonHandler):
                 template = self.templates['email_nocode']
         elif type == 'HTML Attachment':
             if code == 'Code':
-                template = ''
+                template = self.templates['html']
             else:
                 template = self.templates['html_nocode']
         elif type == 'PDF Attachment':
