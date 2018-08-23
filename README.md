@@ -8,6 +8,13 @@ A jupyterlab extension to email notebooks from the browser.
 
 ![](https://raw.githubusercontent.com/timkpaine/jupyterlab_email/master/docs/example.gif)
 
+## Options
+- Inline notebook as email, with code
+- Inline notebook as email, without code
+- Send notebook as HTML attachment, with code
+- Send notebook as HTML attachment, without code
+- Send notebook as PDF attachment, with code
+- Send notebook as PDF attachment, without code
 
 ## Install
 ```bash

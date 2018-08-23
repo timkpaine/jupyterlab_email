@@ -169,7 +169,6 @@ function activate(app: JupyterLab,
 
   let commands = app.commands;
   let all_emails1: string[] = [];
-  let all_emails2: string[] = [];
   let all_accounts: string[] = [];
   let all_templates: string[] = [];
   let loaded = false;
@@ -190,10 +189,9 @@ function activate(app: JupyterLab,
         for (let email of info['emails']){
 
         let command1 = 'send-email:' + email;
-        let command2 = 'send-email-nocode:' + email;
+
         all_accounts.push(email);
         all_emails1.push(command1);
-        all_emails2.push(command2);
 
         let send_widget = new SendEmailWidget(all_accounts,false, email);
         app.commands.addCommand(command1, {
@@ -264,53 +262,15 @@ function activate(app: JupyterLab,
             }
           });
 
-          app.commands.addCommand(command2, {
-          label: command2,
-          isEnabled: () => {
-            if (app.shell.currentWidget && docManager.contextForWidget(app.shell.currentWidget) && docManager.contextForWidget(app.shell.currentWidget).model){
-              return true;
-            } 
-            return false;
-          },
-          execute: () => {
-            showDialog({
-                title: 'Send email:',
-                body: new SendEmailWidget(all_accounts, true, email),
-                // focusNodeSelector: 'input',
-                buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Ok' })]
-              }).then(result => {
-                if (result.button.label === 'CANCEL') {
-                  return;
-                }
-              });
-            }
-          });
-
           palette.addItem({command: command1, category: 'Email'});
-          palette.addItem({command: command2, category: 'Email'});
 
           const menu = new Menu({ commands });
           menu.title.label = 'Send Emails';
 
-          const menu1 = new Menu({ commands });
-          menu1.title.label = 'With Code';
-
-          let menu2 = new Menu({ commands });
-          menu2.title.label = 'No Code';
-
-          console.log(all_emails1);
-          console.log(all_emails2);
-
           app.restored.then(() => {
             all_emails1.forEach(command => {
-              menu1.addItem({command, args: {}})
+              menu.addItem({command, args: {}})
             });
-            all_emails2.forEach(command => {
-              menu2.addItem({command, args: {}})
-            });
-
-            menu.addItem({type: 'submenu', submenu: menu1});
-            menu.addItem({type: 'submenu', submenu: menu2});
 
             if (mainMenu && !loaded) {
               console.log('adding submenu');
@@ -318,8 +278,6 @@ function activate(app: JupyterLab,
               mainMenu.fileMenu.addGroup([{ type:'submenu', submenu: menu }], 11);
             }
           });
-
-
         }
 
       } else {
