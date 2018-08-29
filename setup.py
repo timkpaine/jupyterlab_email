@@ -9,11 +9,11 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='jupyterlab_email',
-    version='0.0.4',
+    version='0.0.5',
     description='Sending emails from JupyterLab',
     long_description=long_description,
     url='https://github.com/timkpaine/jupyterlab_email',
-    download_url='https://github.com/timkpaine/jupyterlab_email/archive/v0.0.4.tar.gz',
+    download_url='https://github.com/timkpaine/jupyterlab_email/archive/v0.0.5.tar.gz',
     author='Tim Paine',
     author_email='t.paine154@gmail.com',
     license='Apache 2.0',
