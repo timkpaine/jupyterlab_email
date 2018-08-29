@@ -2,7 +2,7 @@ import json
 import os
 import os.path
 from notebook.base.handlers import IPythonHandler
-from .email import email as email_smtp
+from ._email import email as email_smtp
 
 
 class EmailHandler(IPythonHandler):
