@@ -34,6 +34,7 @@ import {
   Widget
 } from '@phosphor/widgets';
 
+
 import '../style/index.css';
 
 const extension: JupyterLabPlugin<void> = {
@@ -60,6 +61,7 @@ class SendEmailWidget extends Widget {
     default_none.value = '';
 
     let type = document.createElement('select');
+    type.appendChild(default_none);
     for(let x of ['Email', 'HTML Attachment', 'PDF Attachment']){
       let option = document.createElement('option');
       option.value = x
