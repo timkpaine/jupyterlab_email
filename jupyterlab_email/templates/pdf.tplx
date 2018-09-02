@@ -123,9 +123,6 @@
 % Input
 %===============================================================================
 
-((* block input_group *))
-((* endblock input_group *))
-
 ((* block input scoped *))
 ((* endblock input *))
 

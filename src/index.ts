@@ -60,6 +60,10 @@ class SendEmailWidget extends Widget {
     default_none.style.display = 'none';
     default_none.value = '';
 
+    let label_type = document.createElement('label');
+    label_type.textContent = 'Type:';
+    body.appendChild(label_type);
+
     let type = document.createElement('select');
     type.appendChild(default_none);
     for(let x of ['Email', 'HTML Attachment', 'PDF Attachment']){
@@ -76,6 +80,10 @@ class SendEmailWidget extends Widget {
     type.style.minHeight = '25px';
     body.appendChild(type);
 
+    let label_code = document.createElement('label');
+    label_code.textContent = 'Code or no Code:';
+    body.appendChild(label_code);
+
     let code = document.createElement('select');
     code.appendChild(default_none);
     for(let x of ['Code', 'No code']){
@@ -91,6 +99,10 @@ class SendEmailWidget extends Widget {
     code.style.marginBottom = '15px';
     code.style.minHeight = '25px';
     body.appendChild(code);
+
+    let label_account = document.createElement('label');
+    label_account.textContent = 'Account:';
+    body.appendChild(label_account);
 
     if(accounts.length > 0){
       let account = document.createElement('select');
@@ -109,14 +121,42 @@ class SendEmailWidget extends Widget {
       body.appendChild(account);
     }
 
+    let label_to = document.createElement('label');
+    label_to.textContent = 'Send email to:';
+    body.appendChild(label_to);
+
     let to = document.createElement('textarea');
     to.placeholder = 'list,of,emails, default is to self';
     to.style.marginBottom = '15px';
     body.appendChild(to);
 
+    let label_subject = document.createElement('label');
+    label_subject.textContent = 'Email Subject:';
+    body.appendChild(label_subject);
+
     let subject = document.createElement('textarea');
     subject.placeholder = 'Subject of email';
     body.appendChild(subject);
+
+    let label_also = document.createElement('label');
+    label_also.textContent = 'Also attach as:';
+    body.appendChild(label_also);
+
+    let also_attach = document.createElement('select');
+    also_attach.appendChild(default_none);
+    for(let x of ['None', 'PDF', 'HTML', 'Both']){
+      let option = document.createElement('option');
+      option.value = x
+      option.textContent = x;
+      also_attach.appendChild(option);
+
+      if (hide_code && x === 'None'){
+        option.selected = true;
+      }
+    }
+    also_attach.style.marginBottom = '15px';
+    also_attach.style.minHeight = '25px';
+    body.appendChild(also_attach);
 
     super({ node: body });
   }
@@ -141,6 +181,9 @@ class SendEmailWidget extends Widget {
     return this.subjectNode.value;
   }
 
+  public getAlsoAttach(): string {
+    return this.alsoAttachNode.value;
+  }
 
   get typeNode(): HTMLSelectElement {
     return this.node.getElementsByTagName('select')[0] as HTMLSelectElement;
@@ -158,6 +201,9 @@ class SendEmailWidget extends Widget {
   }
   get subjectNode(): HTMLTextAreaElement {
     return this.node.getElementsByTagName('textarea')[1] as HTMLTextAreaElement;
+  }
+  get alsoAttachNode(): HTMLSelectElement {
+    return this.node.getElementsByTagName('select')[3] as HTMLSelectElement;
   }
 }
 
@@ -223,6 +269,7 @@ function activate(app: JupyterLab,
                 let code = send_widget.getCode();
                 let to = send_widget.getTo();
                 let subject = send_widget.getSubject();
+                let also_attach = send_widget.getAlsoAttach();
 
                 let path = '';
                 let model = {};
@@ -257,7 +304,8 @@ function activate(app: JupyterLab,
                                            'email': email,
                                            'code': code,
                                            'subject': subject,
-                                           'to': to
+                                           'to': to,
+                                           'also_attach': also_attach
                                          }));
                 });
               });
