@@ -2,7 +2,7 @@ import json
 import os
 import os.path
 from notebook.base.handlers import IPythonHandler
-from ._email import email as email_smtp
+from ._email import make_email, email as email_smtp
 
 
 def get_template(type, code, template, handler):
@@ -72,13 +72,13 @@ class EmailHandler(IPythonHandler):
                 else:
                     to = to.split(',')
 
+                message = make_email(path, model, account['username'] + '@' + account['domain'],
+                                     type, template, code, subject, also_attach, attach_pdf_template, attach_html_template)
                 if 'function' in account:
-                    r = account['function'](path, model, type, template, code, to, subject,
-                                            also_attach, attach_pdf_template, attach_html_template,
+                    r = account['function'](message, to,
                                             account.get('username'), account.get('password'), account.get('domain'), account.get('smtp'), account.get('port'))
                 else:
-                    r = email_smtp(path, model, type, template, code, to, subject,
-                                   also_attach, attach_pdf_template, attach_html_template,
+                    r = email_smtp(message, to,
                                    account['username'], account['password'], account['domain'], account['smtp'], account['port'])
 
                 self.finish(str(r))

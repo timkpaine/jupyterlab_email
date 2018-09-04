@@ -12,7 +12,7 @@ with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
 
 setup(
     name='jupyterlab_email',
-    version='0.0.9',
+    version='0.0.10',
     description='Sending emails from JupyterLab',
     long_description=long_description,
     url='https://github.com/timkpaine/jupyterlab_email',

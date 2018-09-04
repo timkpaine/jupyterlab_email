@@ -1,8 +1,6 @@
 import json
 import emails
 import base64
-import email.encoders as encoders
-import magic
 import nbformat
 from bs4 import BeautifulSoup
 from six import iteritems
@@ -10,25 +8,18 @@ from .nbconvert import run
 from .attachments import CUSTOM_TAG
 
 
-def email(path, model, type, template, code, to, subject,
-          also_attach, also_attach_pdf_template, also_attach_html_template,
-          username, password, domain, host, port):
+def make_email(path, model, from_, type='email', template='', code=False, subject='',
+               also_attach='none', also_attach_pdf_template='', also_attach_html_template=''):
     '''
         path        : path to notebook
         model       : notebook itself (in case deployment strips outputs or
                       notebook not available except through ContentsManager)
+        from_       : address to send the email from
         type        : type to convert notebook to
         template    : template to use when converting notebook
         code        : include input cells in notebook
-        to          : who to send notebook to
         subject     : subject of email
         also_attach : also attach pdf/html/both
-
-        username    : email account username
-        password    : email account password
-        domain      : email account provider
-        host        : smtp host
-        port        : smtp port
     '''
     name = path.rsplit('/', 1)[1].rsplit('.', 1)[0]
     model = nbformat.writes(nbformat.reads(json.dumps(model), 4))
@@ -102,7 +93,7 @@ def email(path, model, type, template, code, to, subject,
 
         # assemble email soup
         soup = str(soup)
-        message = emails.html(charset='utf-8', subject=subject, html=soup, mail_from=username + '@' + domain)
+        message = emails.html(charset='utf-8', subject=subject, html=soup, mail_from=from_)
 
         for img, data in iteritems(imgs_to_attach):
             message.attach(filename=img, content_disposition="inline", data=data)
@@ -115,17 +106,28 @@ def email(path, model, type, template, code, to, subject,
 
         if also_attach in ('html', 'both'):
             message.attach(filename=name + '.html', data=html_nb)
+        return message
+    message = emails.html(subject=subject, html='<html>Attachmend: %s.%s</html>' % (name, type_to), mail_from=from_)
+    message.attach(filename=name + '.' + type_to, data=nb)
 
-    else:
-        message = emails.html(subject=subject, html='<html>Attachmend: %s.%s</html>' % (name, type_to), mail_from=username + '@' + domain)
-        message.attach(filename=name + '.' + type_to, data=nb)
+    if also_attach in ('pdf', 'both'):
+        message.attach(filename=name + '.pdf', data=pdf_nb)
 
-        if also_attach in ('pdf', 'both'):
-            message.attach(filename=name + '.pdf', data=pdf_nb)
+    if also_attach in ('html', 'both'):
+        message.attach(filename=name + '.html', data=html_nb)
 
-        if also_attach in ('html', 'both'):
-            message.attach(filename=name + '.html', data=html_nb)
+    return message
 
+
+def email(message, to, username, password, domain, host, port):
+    '''
+        to          : who to send notebook to
+        username    : email account username
+        password    : email account password
+        domain      : email account provider
+        host        : smtp host
+        port        : smtp port
+    '''
     r = message.send(to=to,
                      smtp={'host': host,
                            'port': port,
