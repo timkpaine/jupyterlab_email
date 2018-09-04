@@ -40,7 +40,7 @@ c.JupyterLabEmail.smtp_servers = [{'name': 'gmail',
 
 
 ## Create email from notebook:
-Use the function in jupyterlab_email._email
+Use the function in `jupyterlab_email._email`
 ```python3
 def make_email(path, model, from_, type='email', template='', code=False, subject='',
                also_attach='none', also_attach_pdf_template='', also_attach_html_template=''):
@@ -58,7 +58,7 @@ def make_email(path, model, from_, type='email', template='', code=False, subjec
 ```
 
 ## Attach dataframe as csv or spreadsheet
-In jupyterlab_email.attachments
+In `jupyterlab_email.attachments`
 
 ```python3
 def attach(data, filename, type):
@@ -68,7 +68,7 @@ Modify `jupyterlab_email.attachments.EXCEL_ENGINE` to use a different excel writ
 
 
 ## Inline LaTeX
-In jupyterlab_email.attachments
+In `jupyterlab_email.attachments`
 
 ```python3
 
