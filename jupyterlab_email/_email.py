@@ -1,11 +1,13 @@
 import json
 import emails
 import base64
-from six import iteritems
 import email.encoders as encoders
+import magic
 import nbformat
 from bs4 import BeautifulSoup
+from six import iteritems
 from .nbconvert import run
+from .attachments import CUSTOM_TAG
 
 
 def email(path, model, type, template, code, to, subject,
@@ -57,6 +59,12 @@ def email(path, model, type, template, code, to, subject,
         for item in soup.findAll('a', {'class': 'anchor-link'}):
             item.decompose()
 
+        # strip matplotlib base outs
+        for item in soup.find_all('div', class_='output_text output_subarea output_execute_result'):
+            for c in item.contents:
+                if '&lt;matplotlib' in str(c):
+                    item.decompose()
+
         # remove dataframe table borders
         for item in soup.findAll('table', {'border': 1}):
             item['border'] = 0
@@ -71,16 +79,36 @@ def email(path, model, type, template, code, to, subject,
         for i, img in enumerate(imgs):
             if not img.get('localdata'):
                 continue
-
             imgs_to_attach[img.get('cell_id') + '_' + str(i) + '.png'] = base64.b64decode(img.get('localdata'))
             img['src'] = 'cid:' + img.get('cell_id') + '_' + str(i) + '.png'
             # encoders.encode_base64(part)
             del img['localdata']
 
+        attaches = soup.find_all(CUSTOM_TAG)
+        att_to_attach = {}
+        # attach custom attachments
+        for i, att in enumerate(attaches):
+            if not att.get('localdata'):
+                continue
+            filename = att.get('filename')
+            if filename.endswith('.png') or \
+               filename.endswith('.xls') or \
+               filename.endswith('.xlsx') or \
+               filename.endswith('.pdf'):
+                att_to_attach[filename] = base64.b64decode(att.get('localdata'))
+            else:
+                att_to_attach[filename] = att.get('localdata')
+            att.decompose()
+
+        # assemble email soup
         soup = str(soup)
         message = emails.html(charset='utf-8', subject=subject, html=soup, mail_from=username + '@' + domain)
+
         for img, data in iteritems(imgs_to_attach):
             message.attach(filename=img, content_disposition="inline", data=data)
+
+        for att, data in iteritems(att_to_attach):
+            message.attach(filename=att, content_disposition="inline", data=data)
 
         if also_attach in ('pdf', 'both'):
             message.attach(filename=name + '.pdf', data=pdf_nb)
