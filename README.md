@@ -17,6 +17,7 @@ A jupyterlab extension to email notebooks from the browser.
 - Send notebook as HTML attachment, without code
 - Send notebook as PDF attachment, with code
 - Send notebook as PDF attachment, without code
+- Attach output data as CSV, TSV, PDF, PNG, or Excel Spreadsheet
 
 ## Install
 ```bash
