@@ -60,7 +60,7 @@ def make_email(path, model, from_, type='email', template='', code=False, subjec
 ## Attach dataframe as csv or spreadsheet
 In jupyterlab_email.attachments
 
-```
+```python3
 def attach(data, filename, type):
 ```
 
