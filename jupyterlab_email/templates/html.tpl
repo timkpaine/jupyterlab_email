@@ -18,6 +18,10 @@
         border-top: none;
     }
 
+    div.cell {
+        /* fix for outlook */
+        border: none !important;
+    }
     div {
 
     }
