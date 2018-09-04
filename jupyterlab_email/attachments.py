@@ -33,3 +33,13 @@ def attach(data, filename, type):
     html = '<{tag} filename="{filename}" localdata="{data}">(Attachment: {filename})</{tag}>'.format(
         tag=CUSTOM_TAG, filename=filename, data=data)
     return HTML(html)
+
+
+def latex(expression):
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(10, 1))
+    ax.xaxis.set_visible(False)
+    ax.yaxis.set_visible(False)
+    ax.axis('off')
+    plt.text(0, 0.6, r'$%s$' % expression, fontsize=25)
+    plt.show()
