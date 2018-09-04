@@ -52,6 +52,7 @@ class SendEmailWidget extends Widget {
     let body = document.createElement('div');
     body.style.display = 'flex';
     body.style.flexDirection = 'column';
+    body.classList.add('jupyterlab_email_form');
 
     let default_none = document.createElement('option');
     default_none.selected = false;
