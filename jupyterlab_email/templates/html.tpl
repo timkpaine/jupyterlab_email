@@ -170,7 +170,12 @@
 </style>
 {%- endblock html_head -%}
 
-
 {% block in_prompt -%}
 {%- endblock in_prompt %}
+
+{% block empty_in_prompt -%}
+{%- endblock empty_in_prompt %}
+
+{% block output_area_prompt %}
+{% endblock output_area_prompt %}
 
