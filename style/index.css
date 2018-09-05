@@ -1,6 +1,25 @@
+
 div.jupyterlab_email_form {
     overflow:visible;
 }
+
+span.jupyterlab_email_open{
+    background-image: var(--jp-icon-caretdown);
+    min-height:16px;
+    min-width:16px;
+    background-size: 16px;
+    display:block;
+}   
+
+span.jupyterlab_email_close{
+    background-image: var(--jp-icon-caretup);
+    min-height:16px;
+    min-width:16px;
+    background-size: 16px;
+    display:block;
+    margin-top:5px;
+}
+
 div.jupyterlab_email_form div.jp-select-wrapper {
     padding:0px;
     height:25px;

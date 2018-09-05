@@ -101,27 +101,6 @@ class SendEmailWidget extends Widget {
     code.style.minHeight = '25px';
     body.appendChild(code);
 
-    let label_account = document.createElement('label');
-    label_account.textContent = 'Account:';
-    body.appendChild(label_account);
-
-    if(accounts.length > 0){
-      let account = document.createElement('select');
-      account.appendChild(default_none);
-      for(let x of accounts){
-        let option = document.createElement('option');
-        option.value = x
-        option.textContent = x;
-        account.appendChild(option);
-        if(x === account_name){
-          option.selected = true;
-        }
-      }
-      account.style.marginBottom = '15px';
-      account.style.minHeight = '25px';
-      body.appendChild(account);
-    }
-
     let label_to = document.createElement('label');
     label_to.textContent = 'Send email to:';
     body.appendChild(label_to);
@@ -139,9 +118,75 @@ class SendEmailWidget extends Widget {
     subject.placeholder = 'Subject of email';
     body.appendChild(subject);
 
+    let advanced = document.createElement('div');
+    let advanced_label = document.createElement('label');
+    advanced_label.textContent = 'Advanced';
+    advanced_label.style.textAlign = 'center';
+
+    let advanced_button_open = document.createElement('button');
+    let advanced_span_open = document.createElement('span');
+    let advanced_button_close = document.createElement('button');
+    let advanced_span_close = document.createElement('span');
+
+    advanced_button_open.classList.add('jp-ToolbarButtonComponent');
+    advanced_button_close.classList.add('jp-ToolbarButtonComponent');
+
+    advanced_button_open.appendChild(advanced_span_open);
+    advanced_button_close.appendChild(advanced_span_close);
+    advanced_span_open.classList.add('jupyterlab_email_open');
+    advanced_span_open.classList.add('jp-Icon');
+    advanced_span_open.classList.add('jp-Icon-16');
+    
+    advanced_span_close.classList.add('jupyterlab_email_close');
+    advanced_span_close.classList.add('jp-Icon');
+    advanced_span_close.classList.add('jp-Icon-16');
+
+    body.appendChild(advanced_label);
+    body.appendChild(advanced_button_open);
+    body.appendChild(advanced);
+    body.appendChild(advanced_button_close);
+
+
+    advanced.style.display = 'none';
+    advanced_button_open.style.display = 'block';
+    advanced_button_close.style.display = 'none';
+
+    advanced_button_open.onclick = () =>{
+        advanced.style.display = 'block';
+        advanced_button_open.style.display = 'none';
+        advanced_button_close.style.display = 'block';
+    }
+
+    advanced_button_close.onclick = () =>{
+        advanced.style.display = 'none';
+        advanced_button_open.style.display = 'block';
+        advanced_button_close.style.display = 'none';
+    }
+
+    let label_account = document.createElement('label');
+    label_account.textContent = 'Account:';
+    advanced.appendChild(label_account);
+
+    if(accounts.length > 0){
+      let account = document.createElement('select');
+      account.appendChild(default_none);
+      for(let x of accounts){
+        let option = document.createElement('option');
+        option.value = x
+        option.textContent = x;
+        account.appendChild(option);
+        if(x === account_name){
+          option.selected = true;
+        }
+      }
+      account.style.marginBottom = '15px';
+      account.style.minHeight = '25px';
+      advanced.appendChild(account);
+    }
+
     let label_also = document.createElement('label');
     label_also.textContent = 'Also attach as:';
-    body.appendChild(label_also);
+    advanced.appendChild(label_also);
 
     let also_attach = document.createElement('select');
     also_attach.appendChild(default_none);
@@ -157,7 +202,27 @@ class SendEmailWidget extends Widget {
     }
     also_attach.style.marginBottom = '15px';
     also_attach.style.minHeight = '25px';
-    body.appendChild(also_attach);
+    advanced.appendChild(also_attach);
+
+    let label_templates = document.createElement('label');
+    label_templates.textContent = 'Template:';
+    advanced.appendChild(label_templates);
+
+    let templates = document.createElement('select');
+    templates.appendChild(default_none);
+    for(let x of ['test']){
+      let option = document.createElement('option');
+      option.value = x
+      option.textContent = x;
+      templates.appendChild(option);
+
+      if (hide_code && x === 'None'){
+        option.selected = true;
+      }
+    }
+    templates.style.marginBottom = '15px';
+    templates.style.minHeight = '25px';
+    advanced.appendChild(templates);
 
     super({ node: body });
   }
