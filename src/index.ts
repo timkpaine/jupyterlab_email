@@ -54,74 +54,25 @@ class SendEmailWidget extends Widget {
     body.style.flexDirection = 'column';
     body.classList.add('jupyterlab_email_form');
 
-    let default_none = document.createElement('option');
-    default_none.selected = false;
-    default_none.disabled = true;
-    default_none.hidden = false;
-    default_none.style.display = 'none';
-    default_none.value = '';
+    let basic = document.createElement('div');
+    basic.style.flex = '1';
+    body.appendChild(basic);
 
-    let label_type = document.createElement('label');
-    label_type.textContent = 'Type:';
-    body.appendChild(label_type);
+    basic.appendChild(Private.buildLabel('Type:'));
+    basic.appendChild(Private.buildSelect(['Email', 'HTML Attachment', 'PDF Attachment'], 'Email'));
+    basic.appendChild(Private.buildLabel('Code or no Code:'));
+    basic.appendChild(Private.buildSelect(['Code', 'No code'], 'No code'));
+    basic.appendChild(Private.buildLabel('Send email to:'));
+    basic.appendChild(Private.buildTextarea('list, of, emails, default is to self'));
+    basic.appendChild(Private.buildLabel('Email Subject:'));
+    basic.appendChild(Private.buildTextarea('Subject of email'));
 
-    let type = document.createElement('select');
-    type.appendChild(default_none);
-    for(let x of ['Email', 'HTML Attachment', 'PDF Attachment']){
-      let option = document.createElement('option');
-      option.value = x
-      option.textContent = x;
-      type.appendChild(option);
-
-      if (x === 'Email'){
-        option.selected = true;
-      }
-    }
-    type.style.marginBottom = '15px';
-    type.style.minHeight = '25px';
-    body.appendChild(type);
-
-    let label_code = document.createElement('label');
-    label_code.textContent = 'Code or no Code:';
-    body.appendChild(label_code);
-
-    let code = document.createElement('select');
-    code.appendChild(default_none);
-    for(let x of ['Code', 'No code']){
-      let option = document.createElement('option');
-      option.value = x
-      option.textContent = x;
-      code.appendChild(option);
-
-      if (hide_code && x === 'No code'){
-        option.selected = true;
-      }
-    }
-    code.style.marginBottom = '15px';
-    code.style.minHeight = '25px';
-    body.appendChild(code);
-
-    let label_to = document.createElement('label');
-    label_to.textContent = 'Send email to:';
-    body.appendChild(label_to);
-
-    let to = document.createElement('textarea');
-    to.placeholder = 'list,of,emails, default is to self';
-    to.style.marginBottom = '15px';
-    body.appendChild(to);
-
-    let label_subject = document.createElement('label');
-    label_subject.textContent = 'Email Subject:';
-    body.appendChild(label_subject);
-
-    let subject = document.createElement('textarea');
-    subject.placeholder = 'Subject of email';
-    body.appendChild(subject);
-
+    /* Advanced options */
     let advanced = document.createElement('div');
+    advanced.style.flex = '1';
+
     let advanced_label = document.createElement('label');
     advanced_label.textContent = 'Advanced';
-    advanced_label.style.textAlign = 'center';
 
     let advanced_button_open = document.createElement('button');
     let advanced_span_open = document.createElement('span');
@@ -143,9 +94,8 @@ class SendEmailWidget extends Widget {
 
     body.appendChild(advanced_label);
     body.appendChild(advanced_button_open);
-    body.appendChild(advanced);
     body.appendChild(advanced_button_close);
-
+    body.appendChild(advanced);
 
     advanced.style.display = 'none';
     advanced_button_open.style.display = 'block';
@@ -163,66 +113,15 @@ class SendEmailWidget extends Widget {
         advanced_button_close.style.display = 'none';
     }
 
-    let label_account = document.createElement('label');
-    label_account.textContent = 'Account:';
-    advanced.appendChild(label_account);
-
-    if(accounts.length > 0){
-      let account = document.createElement('select');
-      account.appendChild(default_none);
-      for(let x of accounts){
-        let option = document.createElement('option');
-        option.value = x
-        option.textContent = x;
-        account.appendChild(option);
-        if(x === account_name){
-          option.selected = true;
-        }
-      }
-      account.style.marginBottom = '15px';
-      account.style.minHeight = '25px';
-      advanced.appendChild(account);
+    if (accounts.length>0) {
+      advanced.appendChild(Private.buildLabel('Account:'));
+      advanced.appendChild(Private.buildSelect(accounts, account_name))
     }
 
-    let label_also = document.createElement('label');
-    label_also.textContent = 'Also attach as:';
-    advanced.appendChild(label_also);
-
-    let also_attach = document.createElement('select');
-    also_attach.appendChild(default_none);
-    for(let x of ['None', 'PDF', 'HTML', 'Both']){
-      let option = document.createElement('option');
-      option.value = x
-      option.textContent = x;
-      also_attach.appendChild(option);
-
-      if (hide_code && x === 'None'){
-        option.selected = true;
-      }
-    }
-    also_attach.style.marginBottom = '15px';
-    also_attach.style.minHeight = '25px';
-    advanced.appendChild(also_attach);
-
-    let label_templates = document.createElement('label');
-    label_templates.textContent = 'Template:';
-    advanced.appendChild(label_templates);
-
-    let templates = document.createElement('select');
-    templates.appendChild(default_none);
-    for(let x of ['test']){
-      let option = document.createElement('option');
-      option.value = x
-      option.textContent = x;
-      templates.appendChild(option);
-
-      if (hide_code && x === 'None'){
-        option.selected = true;
-      }
-    }
-    templates.style.marginBottom = '15px';
-    templates.style.minHeight = '25px';
-    advanced.appendChild(templates);
+    advanced.appendChild(Private.buildLabel('Also attach as:'));
+    advanced.appendChild(Private.buildSelect(['None', 'PDF', 'HTML', 'Both'], 'None'));
+    advanced.appendChild(Private.buildLabel('Template:'));
+    advanced.appendChild(Private.buildSelect(['Test']));
 
     super({ node: body });
   }
@@ -409,5 +308,49 @@ function activate(app: JupyterLab,
   console.log('JupyterLab extension jupyterlab_email is activated!');
 };
 
-
 export default extension;
+
+
+namespace Private {
+    let default_none = document.createElement('option');
+    default_none.selected = false;
+    default_none.disabled = true;
+    default_none.hidden = false;
+    default_none.style.display = 'none';
+    default_none.value = '';
+
+  export 
+  function buildLabel(text: string): HTMLLabelElement {
+    let label = document.createElement('label');
+    label.textContent = text;
+    return label;
+  }
+
+ export 
+  function buildTextarea(text: string): HTMLTextAreaElement {
+    let area = document.createElement('textarea');
+    area.placeholder = text;
+    area.style.marginBottom = '15px';
+    return area;
+  }
+
+
+  export
+  function buildSelect(list: string[], def?: string): HTMLSelectElement {
+    let select = document.createElement('select');
+    select.appendChild(default_none);
+    for(let x of list) {
+      let option = document.createElement('option');
+      option.value = x
+      option.textContent = x;
+      select.appendChild(option);
+
+      if (def && x === def){
+        option.selected = true;
+      }
+    }
+    select.style.marginBottom = '15px';
+    select.style.minHeight = '25px';
+    return select;
+  }
+}

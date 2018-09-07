@@ -3,7 +3,7 @@ div.jupyterlab_email_form {
     overflow:visible;
 }
 
-span.jupyterlab_email_open{
+span.jupyterlab_email_open {
     background-image: var(--jp-icon-caretdown);
     min-height:16px;
     min-width:16px;
@@ -11,13 +11,36 @@ span.jupyterlab_email_open{
     display:block;
 }   
 
-span.jupyterlab_email_close{
+span.jupyterlab_email_close {
     background-image: var(--jp-icon-caretup);
     min-height:16px;
     min-width:16px;
     background-size: 16px;
     display:block;
     margin-top:5px;
+}
+
+div.jupyterlab_email_form > div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+div.jupyterlab_email_form > button{
+    min-height: 24px;
+    width:25%;   
+}
+
+div.jupyterlab_email_form > div > label,
+div.jupyterlab_email_form > div > div,
+div.jupyterlab_email_form > div > button,
+div.jupyterlab_email_form > div > textarea {
+    width: 100%;
+}
+
+div.jupyterlab_email_form > div > div > select {
+    width: 75%;
 }
 
 div.jupyterlab_email_form div.jp-select-wrapper {
@@ -28,7 +51,7 @@ div.jupyterlab_email_form div.jp-select-wrapper {
 
 div.jupyterlab_email_form label {
     padding:0px;
-    padding-top: 10px;
+    margin-top: 10px;
 }
 
 div.jupyterlab_email_form textarea {
