@@ -2,7 +2,7 @@ import base64
 import pandas as pd
 from IPython.display import HTML
 from io import BytesIO
-
+from html import escape
 
 CUSTOM_TAG = 'jupyterlab_email_data'
 EXCEL_ENGINE = 'xlsxwriter'
@@ -21,6 +21,9 @@ def attach(data, filename, type):
             data.to_excel(writer)
             writer.save()
             data = base64.b64encode(io.getvalue()).decode('ascii')
+        elif type == 'html':
+            data = escape(data)
+
     if type not in ('csv', 'tsv',
                     'png', 'pdf',
                     'xls', 'xlsx',
