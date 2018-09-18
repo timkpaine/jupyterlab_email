@@ -9,7 +9,9 @@ from .attachments import CUSTOM_TAG
 
 
 def make_email(path, model, from_, type='email', template='', code=False, subject='',
-               also_attach='none', also_attach_pdf_template='', also_attach_html_template=''):
+               header='', footer='',
+               also_attach='none', also_attach_pdf_template='', also_attach_html_template='',
+               postprocessor=None, postprocessor_kwargs=None):
     '''
         path        : path to notebook
         model       : notebook itself (in case deployment strips outputs or
@@ -19,7 +21,10 @@ def make_email(path, model, from_, type='email', template='', code=False, subjec
         template    : template to use when converting notebook
         code        : include input cells in notebook
         subject     : subject of email
+        header      : header to inject
+        footer      : footer to inject
         also_attach : also attach pdf/html/both
+        postprocessor : run postprocessor on soup
     '''
     name = path.rsplit('/', 1)[1].rsplit('.', 1)[0]
     model = nbformat.writes(nbformat.reads(json.dumps(model), 4))
@@ -77,6 +82,7 @@ def make_email(path, model, from_, type='email', template='', code=False, subjec
 
         attaches = soup.find_all(CUSTOM_TAG)
         att_to_attach = {}
+
         # attach custom attachments
         for i, att in enumerate(attaches):
             if not att.get('localdata'):
@@ -90,6 +96,21 @@ def make_email(path, model, from_, type='email', template='', code=False, subjec
             else:
                 att_to_attach[filename] = att.get('localdata')
             att.decompose()
+
+        # attach header/footer
+        if header or footer:
+            head = soup.find('div', {'class': 'header'})
+            foot = soup.find('div', {'class': 'footer'})
+            head.append((BeautifulSoup(header), 'html.parser'))
+            foot.append((BeautifulSoup(footer), 'html.parser'))
+
+        if postprocessor:
+            if postprocessor_kwargs is None:
+                postprocessor_kwargs = {}
+            tmp = postprocessor(soup, **postprocessor_kwargs)
+            if tmp is not None:
+                # returned the soup
+                soup = tmp
 
         # assemble email soup
         soup = str(soup)

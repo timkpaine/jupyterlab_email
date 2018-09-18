@@ -1,7 +1,6 @@
 {%- extends 'full.tpl' -%}
 
 {%- block html_head -%}
-{{ super() }}
 <style type="text/css">
     body {
         font-family: Calibri;
@@ -172,7 +171,14 @@
         font-size: 0.75em;
     }
 </style>
+{{ super() }}
+<div class="header"></div>
 {%- endblock html_head -%}
+
+{% block footer %}
+<div class="footer"></div>
+{{ super() }}
+{%- endblock footer %}
 
 {% block in_prompt -%}
 {%- endblock in_prompt %}
@@ -182,4 +188,5 @@
 
 {% block output_area_prompt %}
 {% endblock output_area_prompt %}
+
 
