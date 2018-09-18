@@ -8,4 +8,4 @@ def _jupyter_server_extension_paths():
         "module": "jupyterlab_email.extension"
     }]
 
-__version__ = '0.0.11'
+__version__ = '0.1.0'
