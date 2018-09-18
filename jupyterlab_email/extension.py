@@ -15,6 +15,7 @@ def load_jupyter_server_extension(nb_server_app):
     web_app = nb_server_app.web_app
     emails = nb_server_app.config.get('JupyterLabEmail', {}).get('smtp_servers', {})
 
+    user_templates = nb_server_app.config.get('JupyterLabEmail', {}).get('templates', {})
     headers = nb_server_app.config.get('JupyterLabEmail', {}).get('headers', {})
     footers = nb_server_app.config.get('JupyterLabEmail', {}).get('footers', {})
     signatures = nb_server_app.config.get('JupyterLabEmail', {}).get('signatures', {})
@@ -42,6 +43,7 @@ def load_jupyter_server_extension(nb_server_app):
     context['signatures'] = signatures
     context['postprocessors'] = postprocessors
     context['templates'] = {}
+    context['user_templates'] = user_templates
     context['templates']['email'] = os.path.join(os.path.dirname(__file__), 'templates', 'html_email.tpl')
     context['templates']['email_nocode'] = os.path.join(os.path.dirname(__file__), 'templates', 'hide_code_cells_html_email.tpl')
     context['templates']['html'] = os.path.join(os.path.dirname(__file__), 'templates', 'html.tpl')

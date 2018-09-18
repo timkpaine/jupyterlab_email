@@ -30,9 +30,10 @@ def get_template(type, code, template, handler):
 
 
 class EmailHandler(IPythonHandler):
-    def initialize(self, emails=None, templates=None, headers=None, footers=None, signatures=None, postprocessors=None):
+    def initialize(self, emails=None, templates=None, user_templates=None, headers=None, footers=None, signatures=None, postprocessors=None):
         self.emails = emails
         self.templates = templates
+        self.user_templates = user_templates
         self.headers = headers
         self.footers = footers
         self.signatures = signatures
@@ -49,9 +50,9 @@ class EmailHandler(IPythonHandler):
         also_attach = body.get('also_attach', 'none').lower()
         template = body.get('type')
 
-        header = body.get('header')
-        footer = body.get('footer')
-        signature = body.get('signature')
+        header = self.headers.get(body.get('header', ''), '')
+        footer = self.footers.get(body.get('footer', ''), '')
+        signature = self.signatures.get(body.get('signature', ''), '')
 
         template = get_template(type, code, template, self)
         attach_html_template = get_template('html', code, None, self)
@@ -97,9 +98,10 @@ class EmailHandler(IPythonHandler):
 
 
 class EmailsListHandler(IPythonHandler):
-    def initialize(self, emails=None, templates=None, headers=None, footers=None, signatures=None, postprocessors=None):
+    def initialize(self, emails=None, templates=None, user_templates=None, headers=None, footers=None, signatures=None, postprocessors=None):
         self.emails = emails
         self.templates = templates
+        self.user_templates = user_templates
         self.headers = headers
         self.footers = footers
         self.signatures = signatures
@@ -108,7 +110,7 @@ class EmailsListHandler(IPythonHandler):
     def get(self):
         ret = {}
         ret['emails'] = [x['name'] for x in self.emails]
-        ret['templates'] = [x for x in self.templates]
+        ret['templates'] = [x for x in self.user_templates]
         ret['headers'] = [x for x in self.headers]
         ret['footers'] = [x for x in self.footers]
         ret['signatures'] = [x for x in self.signatures]
