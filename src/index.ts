@@ -48,7 +48,14 @@ const extension: JupyterLabPlugin<void> = {
 
 
 class SendEmailWidget extends Widget {
-  constructor(accounts: string[] = [], hide_code:boolean = false, account_name:string) {
+  constructor(accounts: string[] = [],
+              hide_code:boolean = false,
+              account_name:string = '',
+              templates: string[] = [],
+              signatures: string[] = [],
+              headers: string[] = [],
+              footers: string[] = []
+              ) {
     let body = document.createElement('div');
     body.style.display = 'flex';
     body.style.flexDirection = 'column';
@@ -59,9 +66,9 @@ class SendEmailWidget extends Widget {
     body.appendChild(basic);
 
     basic.appendChild(Private.buildLabel('Type:'));
-    basic.appendChild(Private.buildSelect(['Email', 'HTML Attachment', 'PDF Attachment'], 'Email'));
+    basic.appendChild(Private.buildSelect(['Email', 'HTML Attachment', 'PDF Attachment'], 'type', 'Email'));
     basic.appendChild(Private.buildLabel('Code or no Code:'));
-    basic.appendChild(Private.buildSelect(['Code', 'No code'], 'No code'));
+    basic.appendChild(Private.buildSelect(['Code', 'No code'], 'code', 'No code'));
     basic.appendChild(Private.buildLabel('Send email to:'));
     basic.appendChild(Private.buildTextarea('list, of, emails, default is to self'));
     basic.appendChild(Private.buildLabel('Email Subject:'));
@@ -115,13 +122,31 @@ class SendEmailWidget extends Widget {
 
     if (accounts.length>0) {
       advanced.appendChild(Private.buildLabel('Account:'));
-      advanced.appendChild(Private.buildSelect(accounts, account_name))
+      advanced.appendChild(Private.buildSelect(accounts, 'accounts', account_name))
     }
 
     advanced.appendChild(Private.buildLabel('Also attach as:'));
-    advanced.appendChild(Private.buildSelect(['None', 'PDF', 'HTML', 'Both'], 'None'));
-    advanced.appendChild(Private.buildLabel('Template:'));
-    advanced.appendChild(Private.buildSelect(['Test']));
+    advanced.appendChild(Private.buildSelect(['None', 'PDF', 'HTML', 'Both'], 'attach', 'None'));
+
+    if(templates.length > 0){
+      advanced.appendChild(Private.buildLabel('Template:'));
+      advanced.appendChild(Private.buildSelect(templates, 'templates'));
+    }
+
+    if(signatures.length > 0){
+      advanced.appendChild(Private.buildLabel('Signature:'));
+      advanced.appendChild(Private.buildSelect(signatures, 'signatures'));      
+    }
+
+    if(headers.length > 0){
+      advanced.appendChild(Private.buildLabel('Header:'));
+      advanced.appendChild(Private.buildSelect(headers, 'headers'));
+    }
+
+    if(footers.length > 0){
+      advanced.appendChild(Private.buildLabel('Footer:'));
+      advanced.appendChild(Private.buildSelect(footers, 'footers'));
+    }
 
     super({ node: body });
   }
@@ -150,6 +175,22 @@ class SendEmailWidget extends Widget {
     return this.alsoAttachNode.value;
   }
 
+  public getTemplate(): string {
+    return this.templateNode ? this.templateNode.value: '';
+  }
+
+  public getSignature(): string {
+    return this.signatureNode ? this.signatureNode.value: '';
+  }
+
+  public getHeader(): string {
+    return this.headerNode ? this.headerNode.value: '';
+  }
+
+  public getFooter(): string {
+    return this.footerNode ? this.footerNode.value: '';
+  }
+
   get typeNode(): HTMLSelectElement {
     return this.node.getElementsByTagName('select')[0] as HTMLSelectElement;
   }
@@ -161,14 +202,33 @@ class SendEmailWidget extends Widget {
   get emailNode(): HTMLSelectElement {
     return this.node.getElementsByTagName('select')[2] as HTMLSelectElement;
   }
+
   get toNode(): HTMLTextAreaElement {
     return this.node.getElementsByTagName('textarea')[0] as HTMLTextAreaElement;
   }
+
   get subjectNode(): HTMLTextAreaElement {
     return this.node.getElementsByTagName('textarea')[1] as HTMLTextAreaElement;
   }
+
   get alsoAttachNode(): HTMLSelectElement {
     return this.node.getElementsByTagName('select')[3] as HTMLSelectElement;
+  }
+  
+  get templateNode(): HTMLSelectElement {
+    return this.node.querySelector('select.templates') as HTMLSelectElement;
+  }
+
+  get signatureNode(): HTMLSelectElement {
+    return this.node.querySelector('select.signatures') as HTMLSelectElement;
+  }
+
+  get headerNode(): HTMLSelectElement {
+    return this.node.querySelector('select.headers') as HTMLSelectElement;
+  }
+
+  get footerNode(): HTMLSelectElement {
+    return this.node.querySelector('select.footers') as HTMLSelectElement;
   }
 }
 
@@ -184,6 +244,9 @@ function activate(app: JupyterLab,
   let all_emails1: string[] = [];
   let all_accounts: string[] = [];
   let all_templates: string[] = [];
+  let all_signatures: string[] = [];
+  let all_headers: string[] = [];
+  let all_footers: string[] = [];
   let loaded = false;
 
   // grab templates from serverextension
@@ -199,6 +262,18 @@ function activate(app: JupyterLab,
           all_templates.push(template);
         }
 
+        for (let signature of info['signatures']){
+          all_signatures.push(signature);
+        }
+
+        for (let header of info['headers']){
+          all_headers.push(header);
+        }
+
+        for (let footer of info['footers']){
+          all_footers.push(footer);
+        }
+
         for (let email of info['emails']){
 
         let command1 = 'send-email:' + email;
@@ -206,7 +281,7 @@ function activate(app: JupyterLab,
         all_accounts.push(email);
         all_emails1.push(command1);
 
-        let send_widget = new SendEmailWidget(all_accounts,false, email);
+        let send_widget = new SendEmailWidget(all_accounts,false, email, all_templates, all_signatures, all_headers, all_footers);
         app.commands.addCommand(command1, {
           label: command1,
           isEnabled: () => {
@@ -235,6 +310,10 @@ function activate(app: JupyterLab,
                 let to = send_widget.getTo();
                 let subject = send_widget.getSubject();
                 let also_attach = send_widget.getAlsoAttach();
+                let template = send_widget.getTemplate();
+                let signature = send_widget.getSignature();
+                let header = send_widget.getHeader();
+                let footer = send_widget.getFooter();
 
                 let path = '';
                 let model = {};
@@ -270,7 +349,11 @@ function activate(app: JupyterLab,
                                            'code': code,
                                            'subject': subject,
                                            'to': to,
-                                           'also_attach': also_attach
+                                           'also_attach': also_attach,
+                                           'template': template,
+                                           'signature': signature,
+                                           'header': header,
+                                           'footer': footer
                                          }));
                 });
               });
@@ -336,8 +419,9 @@ namespace Private {
 
 
   export
-  function buildSelect(list: string[], def?: string): HTMLSelectElement {
+  function buildSelect(list: string[], _class = '', def?: string): HTMLSelectElement {
     let select = document.createElement('select');
+    select.classList.add(_class);
     select.appendChild(default_none);
     for(let x of list) {
       let option = document.createElement('option');

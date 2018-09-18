@@ -101,8 +101,8 @@ def make_email(path, model, from_, type='email', template='', code=False, subjec
         if header or footer:
             head = soup.find('div', {'class': 'header'})
             foot = soup.find('div', {'class': 'footer'})
-            head.append((BeautifulSoup(header), 'html.parser'))
-            foot.append((BeautifulSoup(footer), 'html.parser'))
+            head.append(BeautifulSoup(header, 'html.parser'))
+            foot.append(BeautifulSoup(footer, 'html.parser'))
 
         if postprocessor:
             if postprocessor_kwargs is None:

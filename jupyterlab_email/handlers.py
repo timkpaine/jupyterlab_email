@@ -30,9 +30,13 @@ def get_template(type, code, template, handler):
 
 
 class EmailHandler(IPythonHandler):
-    def initialize(self, emails=None, templates=None):
+    def initialize(self, emails=None, templates=None, headers=None, footers=None, signatures=None, postprocessors=None):
         self.emails = emails
         self.templates = templates
+        self.headers = headers
+        self.footers = footers
+        self.signatures = signatures
+        self.postprocessors = postprocessors
 
     def post(self):
         body = json.loads(self.request.body)
@@ -44,6 +48,10 @@ class EmailHandler(IPythonHandler):
         type = body.get('type', 'email').lower()
         also_attach = body.get('also_attach', 'none').lower()
         template = body.get('type')
+
+        header = body.get('header')
+        footer = body.get('footer')
+        signature = body.get('signature')
 
         template = get_template(type, code, template, self)
         attach_html_template = get_template('html', code, None, self)
@@ -73,7 +81,9 @@ class EmailHandler(IPythonHandler):
                     to = to.split(',')
 
                 message = make_email(path, model, account['username'] + '@' + account['domain'],
-                                     type, template, code, subject, also_attach, attach_pdf_template, attach_html_template)
+                                     type, template, code, subject,
+                                     header, footer or signature,
+                                     also_attach, attach_pdf_template, attach_html_template)
                 if 'function' in account:
                     r = account['function'](message, to,
                                             account.get('username'), account.get('password'), account.get('domain'), account.get('smtp'), account.get('port'))
@@ -87,12 +97,20 @@ class EmailHandler(IPythonHandler):
 
 
 class EmailsListHandler(IPythonHandler):
-    def initialize(self, emails=None, templates=None):
+    def initialize(self, emails=None, templates=None, headers=None, footers=None, signatures=None, postprocessors=None):
         self.emails = emails
         self.templates = templates
+        self.headers = headers
+        self.footers = footers
+        self.signatures = signatures
+        self.postprocessors = postprocessors
 
     def get(self):
         ret = {}
         ret['emails'] = [x['name'] for x in self.emails]
         ret['templates'] = [x for x in self.templates]
+        ret['headers'] = [x for x in self.headers]
+        ret['footers'] = [x for x in self.footers]
+        ret['signatures'] = [x for x in self.signatures]
+        ret['postprocessors'] = [x for x in self.postprocessors]
         self.finish(json.dumps(ret))
