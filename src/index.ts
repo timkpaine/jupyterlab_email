@@ -371,7 +371,6 @@ function activate(app: JupyterLab,
             });
 
             if (mainMenu && !loaded) {
-              console.log('adding submenu');
               loaded = true;
               mainMenu.fileMenu.addGroup([{ type:'submenu', submenu: menu }], 11);
             }
