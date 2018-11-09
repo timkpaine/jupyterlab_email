@@ -128,7 +128,7 @@ def make_email(path, model, from_, type='email', template='', code=False, subjec
         if also_attach in ('html', 'both'):
             message.attach(filename=name + '.html', data=html_nb)
         return message
-    message = emails.html(subject=subject, html='<html>Attachmend: %s.%s</html>' % (name, type_to), mail_from=from_)
+    message = emails.html(subject=subject, html='<html>Attachment: %s.%s</html>' % (name, type_to), mail_from=from_)
     message.attach(filename=name + '.' + type_to, data=nb)
 
     if also_attach in ('pdf', 'both'):
