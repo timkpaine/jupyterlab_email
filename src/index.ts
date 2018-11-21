@@ -46,7 +46,7 @@ const extension: JupyterLabPlugin<void> = {
 };
 
 
-
+export
 class SendEmailWidget extends Widget {
   constructor(accounts: string[] = [],
               hide_code:boolean = false,
@@ -391,7 +391,7 @@ function activate(app: JupyterLab,
 };
 
 export default extension;
-
+export {activate as _activate};
 
 namespace Private {
     let default_none = document.createElement('option');
