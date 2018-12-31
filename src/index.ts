@@ -34,6 +34,9 @@ import {
   Widget
 } from '@phosphor/widgets';
 
+import {
+  request, RequestResult
+} from './request';
 
 import '../style/index.css';
 
@@ -250,143 +253,129 @@ function activate(app: JupyterLab,
   let loaded = false;
 
   // grab templates from serverextension
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", PageConfig.getBaseUrl() + "email/get", true);
+  request('get', PageConfig.getBaseUrl() + "email/get").then((res: RequestResult) => {
+    if(res.ok){
+      let info = res.json() as {[key: string]: string};
 
-  xhr.onload = function (e:any) {
-    if (xhr.readyState === 4) {
-      if (xhr.status === 200) {
-        let info = JSON.parse(xhr.responseText);
+      for (let template of info['templates']){
+        all_templates.push(template);
+      }
 
-        for (let template of info['templates']){
-          all_templates.push(template);
-        }
+      for (let signature of info['signatures']){
+        all_signatures.push(signature);
+      }
 
-        for (let signature of info['signatures']){
-          all_signatures.push(signature);
-        }
+      for (let header of info['headers']){
+        all_headers.push(header);
+      }
 
-        for (let header of info['headers']){
-          all_headers.push(header);
-        }
+      for (let footer of info['footers']){
+        all_footers.push(footer);
+      }
 
-        for (let footer of info['footers']){
-          all_footers.push(footer);
-        }
+      for (let email of info['emails']){
 
-        for (let email of info['emails']){
+      let command1 = 'send-email:' + email;
 
-        let command1 = 'send-email:' + email;
+      all_accounts.push(email);
+      all_emails1.push(command1);
 
-        all_accounts.push(email);
-        all_emails1.push(command1);
+      let send_widget = new SendEmailWidget(all_accounts,false, email, all_templates, all_signatures, all_headers, all_footers);
+      app.commands.addCommand(command1, {
+        label: command1,
+        isEnabled: () => {
+          if (app.shell.currentWidget && docManager.contextForWidget(app.shell.currentWidget) && docManager.contextForWidget(app.shell.currentWidget).model){
+            return true;
+          } 
+          return false;
+        },
+        execute: () => {
+          showDialog({
+              title: 'Send email:',
+              body: send_widget,
+              // focusNodeSelector: 'input',
+              buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Ok' })]
+            }).then(result => {
+              if (result.button.label === 'CANCEL') {
+                return;
+              }
 
-        let send_widget = new SendEmailWidget(all_accounts,false, email, all_templates, all_signatures, all_headers, all_footers);
-        app.commands.addCommand(command1, {
-          label: command1,
-          isEnabled: () => {
-            if (app.shell.currentWidget && docManager.contextForWidget(app.shell.currentWidget) && docManager.contextForWidget(app.shell.currentWidget).model){
-              return true;
-            } 
-            return false;
-          },
-          execute: () => {
-            showDialog({
-                title: 'Send email:',
-                body: send_widget,
-                // focusNodeSelector: 'input',
-                buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Ok' })]
-              }).then(result => {
-                if (result.button.label === 'CANCEL') {
-                  return;
-                }
+              let folder = browser.defaultBrowser.model.path || '';
+              const context = docManager.contextForWidget(app.shell.currentWidget);
 
-                let folder = browser.defaultBrowser.model.path || '';
-                const context = docManager.contextForWidget(app.shell.currentWidget);
+              let type = send_widget.getType();
+              let email = send_widget.getEmail();
+              let code = send_widget.getCode();
+              let to = send_widget.getTo();
+              let subject = send_widget.getSubject();
+              let also_attach = send_widget.getAlsoAttach();
+              let template = send_widget.getTemplate();
+              let signature = send_widget.getSignature();
+              let header = send_widget.getHeader();
+              let footer = send_widget.getFooter();
 
-                let type = send_widget.getType();
-                let email = send_widget.getEmail();
-                let code = send_widget.getCode();
-                let to = send_widget.getTo();
-                let subject = send_widget.getSubject();
-                let also_attach = send_widget.getAlsoAttach();
-                let template = send_widget.getTemplate();
-                let signature = send_widget.getSignature();
-                let header = send_widget.getHeader();
-                let footer = send_widget.getFooter();
+              let path = '';
+              let model = {};
+              if(context){
+                path = context.path; 
+                model = context.model.toJSON();
+              }
 
-                let path = '';
-                let model = {};
-                if(context){
-                  path = context.path; 
-                  model = context.model.toJSON();
-                }
-
-                return new Promise(function(resolve) {
-                  var xhr = new XMLHttpRequest();
-                  xhr.open("POST", PageConfig.getBaseUrl() + "email/run", true);
-                  xhr.onload = function (e:any) {
-                    if (xhr.readyState === 4) {
-                      if (xhr.status === 200) {
-                        showDialog({
-                            title: 'Mail sent!',
-                            buttons: [Dialog.okButton({ label: 'Ok' })]
-                          }).then(() => {resolve();})
-                      } else {
-                        showDialog({
-                            title: 'Something went wrong!',
-                            body: 'Check the Jupyter logs for the exception.',
-                            buttons: [Dialog.okButton({ label: 'Ok' })]
-                          }).then(() => {resolve();})
-                      }
-                    }
-                  };
-                  xhr.send(JSON.stringify({'folder': folder,
-                                           'path': path,
-                                           'model': model,
-                                           'type': type,
-                                           'email': email,
-                                           'code': code,
-                                           'subject': subject,
-                                           'to': to,
-                                           'also_attach': also_attach,
-                                           'template': template,
-                                           'signature': signature,
-                                           'header': header,
-                                           'footer': footer
-                                         }));
+              return new Promise(function(resolve) {
+                request('post',
+                  PageConfig.getBaseUrl() + "email/run",
+                  {},
+                  JSON.stringify({'folder': folder,
+                                         'path': path,
+                                         'model': model,
+                                         'type': type,
+                                         'email': email,
+                                         'code': code,
+                                         'subject': subject,
+                                         'to': to,
+                                         'also_attach': also_attach,
+                                         'template': template,
+                                         'signature': signature,
+                                         'header': header,
+                                         'footer': footer
+                                       })
+                  ).then((res:RequestResult) =>{
+                  if(res.ok){
+                    showDialog({
+                        title: 'Mail sent!',
+                        buttons: [Dialog.okButton({ label: 'Ok' })]
+                      }).then(() => {resolve();})
+                  } else {
+                    showDialog({
+                        title: 'Something went wrong!',
+                        body: 'Check the Jupyter logs for the exception.',
+                        buttons: [Dialog.okButton({ label: 'Ok' })]
+                      }).then(() => {resolve();})
+                  }
                 });
               });
-            }
-          });
-
-          palette.addItem({command: command1, category: 'Email'});
-
-          const menu = new Menu({ commands });
-          menu.title.label = 'Send Emails';
-
-          app.restored.then(() => {
-            all_emails1.forEach(command => {
-              menu.addItem({command, args: {}})
             });
+          }
+        });
 
-            if (mainMenu && !loaded) {
-              loaded = true;
-              mainMenu.fileMenu.addGroup([{ type:'submenu', submenu: menu }], 11);
-            }
+        palette.addItem({command: command1, category: 'Email'});
+
+        const menu = new Menu({ commands });
+        menu.title.label = 'Send Emails';
+
+        app.restored.then(() => {
+          all_emails1.forEach(command => {
+            menu.addItem({command, args: {}})
           });
-        }
 
-      } else {
-        console.error(xhr.statusText);
+          if (mainMenu && !loaded) {
+            loaded = true;
+            mainMenu.fileMenu.addGroup([{ type:'submenu', submenu: menu }], 11);
+          }
+        });
       }
     }
-  }.bind(this);
-  xhr.onerror = function (e) {
-    console.error(xhr.statusText);
-  };
-  xhr.send(null);
-
+  });
   console.log('JupyterLab extension jupyterlab_email is activated!');
 };
 
