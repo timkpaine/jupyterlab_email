@@ -8,13 +8,13 @@ import tempfile
 import subprocess
 
 _COLOR_CODES = {
-    'black': r'(?:\x1b[^m]\d\;30m)([^\x1b]*)'
-    'red': r'(?:\x1b[^m]\d\;31m)([^\x1b]*)'
-    'green': r'(?:\x1b[^m]\d\;32m)([^\x1b]*)'
-    'yellow': r'(?:\x1b[^m]\d\;33m)([^\x1b]*)'
-    'blue': r'(?:\x1b[^m]\d\;34m)([^\x1b]*)'
-    'magenta': r'(?:\x1b[^m]\d\;35m)([^\x1b]*)'
-    'cyan': r'(?:\x1b[^m]\d\;36m)([^\x1b]*)'
+    'black': r'(?:\x1b[^m]\d\;30m)([^\x1b]*)',
+    'red': r'(?:\x1b[^m]\d\;31m)([^\x1b]*)',
+    'green': r'(?:\x1b[^m]\d\;32m)([^\x1b]*)',
+    'yellow': r'(?:\x1b[^m]\d\;33m)([^\x1b]*)',
+    'blue': r'(?:\x1b[^m]\d\;34m)([^\x1b]*)',
+    'magenta': r'(?:\x1b[^m]\d\;35m)([^\x1b]*)',
+    'cyan': r'(?:\x1b[^m]\d\;36m)([^\x1b]*)',
     'white': r'(?:\x1b[^m]\d\;37m)([^\x1b]*)'
 }
 
@@ -63,6 +63,8 @@ def run(to='html',
         _, error = p.communicate()
 
         if p.returncode != 0:
+            error = error.decode('ascii')
+            
             # extract out the cell error
             m = re.search('.*CellExecutionError:(?P<CellError>(.*\n)*)', error, flags=re.MULTILINE)
             g = m.groupdict()
@@ -100,4 +102,5 @@ def run(to='html',
 
     except Exception as e:
         print(e)
+        raise e
         return None, 1
