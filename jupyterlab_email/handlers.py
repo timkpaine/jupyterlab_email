@@ -81,10 +81,13 @@ class EmailHandler(IPythonHandler):
                 else:
                     to = to.split(',')
 
-                message = make_email(path, model, account['username'] + '@' + account['domain'],
-                                     type, template, code, subject,
-                                     header, footer or signature,
-                                     also_attach, attach_pdf_template, attach_html_template)
+                message, error = make_email(path, model, account['username'] + '@' + account['domain'],
+                                            type, template, code, subject,
+                                            header, footer or signature,
+                                            also_attach, attach_pdf_template, attach_html_template)
+                if error:
+                    # set "to" to be "from"
+                    to = account['username'] + '@' + account['domain']
                 if 'function' in account:
                     r = account['function'](message, to,
                                             account.get('username'), account.get('password'), account.get('domain'), account.get('smtp'), account.get('port'))
@@ -93,6 +96,8 @@ class EmailHandler(IPythonHandler):
                                    account['username'], account['password'], account['domain'], account['smtp'], account['port'])
 
                 self.finish(str(r))
+                if error:
+                    raise Exception('Error during conversion!')
                 return
         raise Exception('Email not found!')
 

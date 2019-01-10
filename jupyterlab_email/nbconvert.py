@@ -1,12 +1,35 @@
 # from nbconvert.nbconvertapp import NbConvertApp
 import sys
+import re
 import os
 import os.path
+import html
 import tempfile
 import subprocess
 
+_COLOR_CODES = {
+    'black': r'(?:\x1b[^m]\d\;30m)([^\x1b]*)'
+    'red': r'(?:\x1b[^m]\d\;31m)([^\x1b]*)'
+    'green': r'(?:\x1b[^m]\d\;32m)([^\x1b]*)'
+    'yellow': r'(?:\x1b[^m]\d\;33m)([^\x1b]*)'
+    'blue': r'(?:\x1b[^m]\d\;34m)([^\x1b]*)'
+    'magenta': r'(?:\x1b[^m]\d\;35m)([^\x1b]*)'
+    'cyan': r'(?:\x1b[^m]\d\;36m)([^\x1b]*)'
+    'white': r'(?:\x1b[^m]\d\;37m)([^\x1b]*)'
+}
 
-def run(to='html', name='', in_='', template='', execute=False, execute_timeout=600):
+_CLOSERS = re.compile(r'(?:\x1b[^m]*m)')
+
+with open(os.path.join(os.path.dirname(__file__), 'templates', 'error.tpl'), 'r') as fp:
+    _ERROR_TEMPLATE = fp.read()
+
+
+def run(to='html',
+        name='',
+        in_='',
+        template='',
+        execute=False,
+        execute_timeout=600):
     # write notebook string to disk
     _dir = tempfile.mkdtemp()
     inname = os.path.join(_dir, name)
@@ -36,20 +59,45 @@ def run(to='html', name='', in_='', template='', execute=False, execute_timeout=
     argv.extend([inname, '--output', outname])
 
     try:
-        subprocess.call(argv)
-        outname = os.path.join(_dir, outname)
+        p = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        _, error = p.communicate()
 
-        # hack for pdfs
-        if to == 'pdf':
-            outname += '.' + to
+        if p.returncode != 0:
+            # extract out the cell error
+            m = re.search('.*CellExecutionError:(?P<CellError>(.*\n)*)', error, flags=re.MULTILINE)
+            g = m.groupdict()
 
-        with open(outname, 'rb') as fp:
-            ret = fp.read()
+            # dump it in mail
+            err = g['CellError']
 
-        os.remove(outname)
-        os.remove(inname)
-        return ret
+            # do the escape of <, > before adding real tags
+            err = html.escape(err)
+
+            # convert escape colors to css colors
+            for color, reg in _COLOR_CODES.items():
+                err = re.sub(reg, '<span style="color: {color}">{err}</span> '.format(color=color, err=err))
+
+            # remove and closers
+            err = re.sub(_CLOSERS, '', err)
+
+            # return with template
+            ret = _ERROR_TEMPLATE.format(err.replace('\n', '<br>'))
+            return ret, 1
+
+        else:
+            outname = os.path.join(_dir, outname)
+
+            # hack for pdfs
+            if to == 'pdf':
+                outname += '.' + to
+
+            with open(outname, 'rb') as fp:
+                ret = fp.read()
+
+            os.remove(outname)
+            os.remove(inname)
+            return ret, 0
 
     except Exception as e:
         print(e)
-        return None
+        return None, 1

@@ -8,10 +8,20 @@ from .nbconvert import run
 from .attachments import CUSTOM_TAG
 
 
-def make_email(path, model, from_, type='email', template='', code=False, subject='',
-               header='', footer='',
-               also_attach='none', also_attach_pdf_template='', also_attach_html_template='',
-               postprocessor=None, postprocessor_kwargs=None):
+def make_email(path,
+               model,
+               from_,
+               type='email',
+               template='',
+               code=False,
+               subject='',
+               header='',
+               footer='',
+               also_attach='none',
+               also_attach_pdf_template='',
+               also_attach_html_template='',
+               postprocessor=None,
+               postprocessor_kwargs=None):
     '''
         path        : path to notebook
         model       : notebook itself (in case deployment strips outputs or
@@ -38,7 +48,11 @@ def make_email(path, model, from_, type='email', template='', code=False, subjec
     else:
         raise Exception('Type not recognized')
 
-    nb = run(type_to, name, model, template)
+    nb, error = run(type_to, name, model, template)
+
+    if error:
+        message = emails.html(charset='utf-8', subject=subject, html=nb, mail_from=from_)
+        return message, error
 
     if also_attach in ('pdf', 'both'):
         pdf_nb = run('pdf', name, model, also_attach_pdf_template)
@@ -127,7 +141,7 @@ def make_email(path, model, from_, type='email', template='', code=False, subjec
 
         if also_attach in ('html', 'both'):
             message.attach(filename=name + '.html', data=html_nb)
-        return message
+        return message, 0
     message = emails.html(subject=subject, html='<html>Attachment: %s.%s</html>' % (name, type_to), mail_from=from_)
     message.attach(filename=name + '.' + type_to, data=nb)
 
@@ -137,7 +151,7 @@ def make_email(path, model, from_, type='email', template='', code=False, subjec
     if also_attach in ('html', 'both'):
         message.attach(filename=name + '.html', data=html_nb)
 
-    return message
+    return message, 0
 
 
 def email(message, to, username, password, domain, host, port):
