@@ -64,7 +64,7 @@ def run(to='html',
 
         if p.returncode != 0:
             error = error.decode('ascii')
-            
+
             # extract out the cell error
             m = re.search('.*CellExecutionError:(?P<CellError>(.*\n)*)', error, flags=re.MULTILINE)
             g = m.groupdict()
