@@ -24,7 +24,7 @@ def load_jupyter_server_extension(nb_server_app):
     base_url = web_app.settings['base_url']
 
     host_pattern = '.*$'
-    print('Installing jupyterlab_email handler on path %s' % url_path_join(base_url, 'emails/get'))
+    print('Installing jupyterlab_email handler on path %s' % url_path_join(base_url, 'emails'))
     print('Available email servers: %s' % ','.join(k['name'] for k in emails))
 
     for k in emails:
