@@ -1,154 +1,155 @@
 import {
-  JupyterLab, JupyterLabPlugin, ILayoutRestorer
-} from '@jupyterlab/application';
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin,
+} from "@jupyterlab/application";
 
 import {
-  ICommandPalette, showDialog, Dialog
-} from '@jupyterlab/apputils';
+  Dialog, ICommandPalette, showDialog,
+} from "@jupyterlab/apputils";
 
 import {
-  PageConfig
-} from '@jupyterlab/coreutils'
+  PageConfig,
+} from "@jupyterlab/coreutils";
 
 import {
-  IDocumentManager
-} from '@jupyterlab/docmanager';
+  IDocumentManager,
+} from "@jupyterlab/docmanager";
 
 import {
-  Menu
-} from '@phosphor/widgets';
+  Menu,
+} from "@phosphor/widgets";
 
 import {
-  IFileBrowserFactory
-} from '@jupyterlab/filebrowser';
+  IFileBrowserFactory,
+} from "@jupyterlab/filebrowser";
 
 import {
-  ILauncher
-} from '@jupyterlab/launcher';
+  ILauncher,
+} from "@jupyterlab/launcher";
 
 import {
-  IMainMenu
-} from '@jupyterlab/mainmenu';
+  IMainMenu,
+} from "@jupyterlab/mainmenu";
 
 import {
-  Widget
-} from '@phosphor/widgets';
+  Widget,
+} from "@phosphor/widgets";
 
 import {
-  request, RequestResult
-} from './request';
+  IRequestResult, request,
+} from "./request";
 
-import '../style/index.css';
+import "../style/index.css";
+
+// tslint:disable: variable-name
 
 const extension: JupyterLabPlugin<void> = {
-  id: 'jupyterlab_email',
+  activate,
   autoStart: true,
-  requires: [IDocumentManager, ICommandPalette, ILayoutRestorer, IMainMenu, IFileBrowserFactory],
+  id: "jupyterlab_email",
   optional: [ILauncher],
-  activate: activate
+  requires: [IDocumentManager, ICommandPalette, ILayoutRestorer, IMainMenu, IFileBrowserFactory],
 };
-
 
 export
 class SendEmailWidget extends Widget {
   constructor(accounts: string[] = [],
-              hide_code:boolean = false,
-              account_name:string = '',
+              hide_code: boolean = false,
+              account_name: string = "",
               templates: string[] = [],
               signatures: string[] = [],
               headers: string[] = [],
-              footers: string[] = []
+              footers: string[] = [],
               ) {
-    let body = document.createElement('div');
-    body.style.display = 'flex';
-    body.style.flexDirection = 'column';
-    body.classList.add('jupyterlab_email_form');
+    const body = document.createElement("div");
+    body.style.display = "flex";
+    body.style.flexDirection = "column";
+    body.classList.add("jupyterlab_email_form");
 
-    let basic = document.createElement('div');
-    basic.style.flex = '1';
+    const basic = document.createElement("div");
+    basic.style.flex = "1";
     body.appendChild(basic);
 
-    basic.appendChild(Private.buildLabel('Type:'));
-    basic.appendChild(Private.buildSelect(['Email', 'HTML Attachment', 'PDF Attachment'], 'type', 'Email'));
-    basic.appendChild(Private.buildLabel('Code or no Code:'));
-    basic.appendChild(Private.buildSelect(['Code', 'No code'], 'code', 'No code'));
-    basic.appendChild(Private.buildLabel('Send email to:'));
-    basic.appendChild(Private.buildTextarea('list, of, emails, default is to self'));
-    basic.appendChild(Private.buildLabel('Email Subject:'));
-    basic.appendChild(Private.buildTextarea('Subject of email'));
+    basic.appendChild(Private.buildLabel("Type:"));
+    basic.appendChild(Private.buildSelect(["Email", "HTML Attachment", "PDF Attachment"], "type", "Email"));
+    basic.appendChild(Private.buildLabel("Code or no Code:"));
+    basic.appendChild(Private.buildSelect(["Code", "No code"], "code", "No code"));
+    basic.appendChild(Private.buildLabel("Send email to:"));
+    basic.appendChild(Private.buildTextarea("list, of, emails, default is to self"));
+    basic.appendChild(Private.buildLabel("Email Subject:"));
+    basic.appendChild(Private.buildTextarea("Subject of email"));
 
     /* Advanced options */
-    let advanced = document.createElement('div');
-    advanced.style.flex = '1';
+    const advanced = document.createElement("div");
+    advanced.style.flex = "1";
 
-    let advanced_label = document.createElement('label');
-    advanced_label.textContent = 'Advanced';
+    const advanced_label = document.createElement("label");
+    advanced_label.textContent = "Advanced";
 
-    let advanced_button_open = document.createElement('button');
-    let advanced_span_open = document.createElement('span');
-    let advanced_button_close = document.createElement('button');
-    let advanced_span_close = document.createElement('span');
+    const advanced_button_open = document.createElement("button");
+    const advanced_span_open = document.createElement("span");
+    const advanced_button_close = document.createElement("button");
+    const advanced_span_close = document.createElement("span");
 
-    advanced_button_open.classList.add('jp-ToolbarButtonComponent');
-    advanced_button_close.classList.add('jp-ToolbarButtonComponent');
+    advanced_button_open.classList.add("jp-ToolbarButtonComponent");
+    advanced_button_close.classList.add("jp-ToolbarButtonComponent");
 
     advanced_button_open.appendChild(advanced_span_open);
     advanced_button_close.appendChild(advanced_span_close);
-    advanced_span_open.classList.add('jupyterlab_email_open');
-    advanced_span_open.classList.add('jp-Icon');
-    advanced_span_open.classList.add('jp-Icon-16');
-    
-    advanced_span_close.classList.add('jupyterlab_email_close');
-    advanced_span_close.classList.add('jp-Icon');
-    advanced_span_close.classList.add('jp-Icon-16');
+    advanced_span_open.classList.add("jupyterlab_email_open");
+    advanced_span_open.classList.add("jp-Icon");
+    advanced_span_open.classList.add("jp-Icon-16");
+
+    advanced_span_close.classList.add("jupyterlab_email_close");
+    advanced_span_close.classList.add("jp-Icon");
+    advanced_span_close.classList.add("jp-Icon-16");
 
     body.appendChild(advanced_label);
     body.appendChild(advanced_button_open);
     body.appendChild(advanced_button_close);
     body.appendChild(advanced);
 
-    advanced.style.display = 'none';
-    advanced_button_open.style.display = 'block';
-    advanced_button_close.style.display = 'none';
+    advanced.style.display = "none";
+    advanced_button_open.style.display = "block";
+    advanced_button_close.style.display = "none";
 
-    advanced_button_open.onclick = () =>{
-        advanced.style.display = 'block';
-        advanced_button_open.style.display = 'none';
-        advanced_button_close.style.display = 'block';
+    advanced_button_open.onclick = () => {
+        advanced.style.display = "block";
+        advanced_button_open.style.display = "none";
+        advanced_button_close.style.display = "block";
+    };
+
+    advanced_button_close.onclick = () => {
+        advanced.style.display = "none";
+        advanced_button_open.style.display = "block";
+        advanced_button_close.style.display = "none";
+    };
+
+    if (accounts.length > 0) {
+      advanced.appendChild(Private.buildLabel("Account:"));
+      advanced.appendChild(Private.buildSelect(accounts, "accounts", account_name));
     }
 
-    advanced_button_close.onclick = () =>{
-        advanced.style.display = 'none';
-        advanced_button_open.style.display = 'block';
-        advanced_button_close.style.display = 'none';
+    advanced.appendChild(Private.buildLabel("Also attach as:"));
+    advanced.appendChild(Private.buildSelect(["None", "PDF", "HTML", "Both"], "attach", "None"));
+
+    if (templates.length > 0) {
+      advanced.appendChild(Private.buildLabel("Template:"));
+      advanced.appendChild(Private.buildSelect(templates, "templates"));
     }
 
-    if (accounts.length>0) {
-      advanced.appendChild(Private.buildLabel('Account:'));
-      advanced.appendChild(Private.buildSelect(accounts, 'accounts', account_name))
+    if (signatures.length > 0) {
+      advanced.appendChild(Private.buildLabel("Signature:"));
+      advanced.appendChild(Private.buildSelect(signatures, "signatures"));
     }
 
-    advanced.appendChild(Private.buildLabel('Also attach as:'));
-    advanced.appendChild(Private.buildSelect(['None', 'PDF', 'HTML', 'Both'], 'attach', 'None'));
-
-    if(templates.length > 0){
-      advanced.appendChild(Private.buildLabel('Template:'));
-      advanced.appendChild(Private.buildSelect(templates, 'templates'));
+    if (headers.length > 0) {
+      advanced.appendChild(Private.buildLabel("Header:"));
+      advanced.appendChild(Private.buildSelect(headers, "headers"));
     }
 
-    if(signatures.length > 0){
-      advanced.appendChild(Private.buildLabel('Signature:'));
-      advanced.appendChild(Private.buildSelect(signatures, 'signatures'));      
-    }
-
-    if(headers.length > 0){
-      advanced.appendChild(Private.buildLabel('Header:'));
-      advanced.appendChild(Private.buildSelect(headers, 'headers'));
-    }
-
-    if(footers.length > 0){
-      advanced.appendChild(Private.buildLabel('Footer:'));
-      advanced.appendChild(Private.buildSelect(footers, 'footers'));
+    if (footers.length > 0) {
+      advanced.appendChild(Private.buildLabel("Footer:"));
+      advanced.appendChild(Private.buildSelect(footers, "footers"));
     }
 
     super({ node: body });
@@ -179,59 +180,59 @@ class SendEmailWidget extends Widget {
   }
 
   public getTemplate(): string {
-    return this.templateNode ? this.templateNode.value: '';
+    return this.templateNode ? this.templateNode.value : "";
   }
 
   public getSignature(): string {
-    return this.signatureNode ? this.signatureNode.value: '';
+    return this.signatureNode ? this.signatureNode.value : "";
   }
 
   public getHeader(): string {
-    return this.headerNode ? this.headerNode.value: '';
+    return this.headerNode ? this.headerNode.value : "";
   }
 
   public getFooter(): string {
-    return this.footerNode ? this.footerNode.value: '';
+    return this.footerNode ? this.footerNode.value : "";
   }
 
   get typeNode(): HTMLSelectElement {
-    return this.node.getElementsByTagName('select')[0] as HTMLSelectElement;
+    return this.node.getElementsByTagName("select")[0] as HTMLSelectElement;
   }
 
   get codeNode(): HTMLSelectElement {
-    return this.node.getElementsByTagName('select')[1] as HTMLSelectElement;
+    return this.node.getElementsByTagName("select")[1] as HTMLSelectElement;
   }
 
   get emailNode(): HTMLSelectElement {
-    return this.node.getElementsByTagName('select')[2] as HTMLSelectElement;
+    return this.node.getElementsByTagName("select")[2] as HTMLSelectElement;
   }
 
   get toNode(): HTMLTextAreaElement {
-    return this.node.getElementsByTagName('textarea')[0] as HTMLTextAreaElement;
+    return this.node.getElementsByTagName("textarea")[0] as HTMLTextAreaElement;
   }
 
   get subjectNode(): HTMLTextAreaElement {
-    return this.node.getElementsByTagName('textarea')[1] as HTMLTextAreaElement;
+    return this.node.getElementsByTagName("textarea")[1] as HTMLTextAreaElement;
   }
 
   get alsoAttachNode(): HTMLSelectElement {
-    return this.node.getElementsByTagName('select')[3] as HTMLSelectElement;
+    return this.node.getElementsByTagName("select")[3] as HTMLSelectElement;
   }
-  
+
   get templateNode(): HTMLSelectElement {
-    return this.node.querySelector('select.templates') as HTMLSelectElement;
+    return this.node.querySelector("select.templates") as HTMLSelectElement;
   }
 
   get signatureNode(): HTMLSelectElement {
-    return this.node.querySelector('select.signatures') as HTMLSelectElement;
+    return this.node.querySelector("select.signatures") as HTMLSelectElement;
   }
 
   get headerNode(): HTMLSelectElement {
-    return this.node.querySelector('select.headers') as HTMLSelectElement;
+    return this.node.querySelector("select.headers") as HTMLSelectElement;
   }
 
   get footerNode(): HTMLSelectElement {
-    return this.node.querySelector('select.footers') as HTMLSelectElement;
+    return this.node.querySelector("select.footers") as HTMLSelectElement;
   }
 }
 
@@ -243,186 +244,198 @@ function activate(app: JupyterLab,
                   browser: IFileBrowserFactory,
                   launcher: ILauncher | null) {
 
-  let commands = app.commands;
-  let all_emails1: string[] = [];
-  let all_accounts: string[] = [];
-  let all_templates: string[] = [];
-  let all_signatures: string[] = [];
-  let all_headers: string[] = [];
-  let all_footers: string[] = [];
+  const commands = app.commands;
+  const all_emails1: string[] = [];
+  const all_accounts: string[] = [];
+  const all_templates: string[] = [];
+  const all_signatures: string[] = [];
+  const all_headers: string[] = [];
+  const all_footers: string[] = [];
   let loaded = false;
 
   // grab templates from serverextension
-  request('get', PageConfig.getBaseUrl() + "email/get").then((res: RequestResult) => {
-    if(res.ok){
-      let info = res.json() as {[key: string]: string};
+  request("get", PageConfig.getBaseUrl() + "email/get").then((res: IRequestResult) => {
+    if (res.ok) {
+      const info = res.json() as {[key: string]: string};
 
-      for (let template of info['templates']){
+      for (const template of info.templates) {
         all_templates.push(template);
       }
 
-      for (let signature of info['signatures']){
+      for (const signature of info.signatures) {
         all_signatures.push(signature);
       }
 
-      for (let header of info['headers']){
+      for (const header of info.headers) {
         all_headers.push(header);
       }
 
-      for (let footer of info['footers']){
+      for (const footer of info.footers) {
         all_footers.push(footer);
       }
 
-      for (let email of info['emails']){
+      for (const email of info.emails) {
 
-      let command1 = 'send-email:' + email;
+      const command1 = "send-email:" + email;
 
       all_accounts.push(email);
       all_emails1.push(command1);
 
-      let send_widget = new SendEmailWidget(all_accounts,false, email, all_templates, all_signatures, all_headers, all_footers);
+      const send_widget = new SendEmailWidget(all_accounts,
+                                              false,
+                                              email,
+                                              all_templates,
+                                              all_signatures,
+                                              all_headers,
+                                              all_footers);
       app.commands.addCommand(command1, {
-        label: command1,
-        isEnabled: () => {
-          if (app.shell.currentWidget && docManager.contextForWidget(app.shell.currentWidget) && docManager.contextForWidget(app.shell.currentWidget).model){
-            return true;
-          } 
-          return false;
-        },
         execute: () => {
           showDialog({
-              title: 'Send email:',
               body: send_widget,
-              // focusNodeSelector: 'input',
-              buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Ok' })]
-            }).then(result => {
-              if (result.button.label === 'CANCEL') {
+              buttons: [Dialog.cancelButton(), Dialog.okButton({ label: "Ok" })],
+              title: "Send email:",
+            }).then((result) => {
+              if (result.button.label === "CANCEL") {
                 return;
               }
 
-              let folder = browser.defaultBrowser.model.path || '';
+              const folder = browser.defaultBrowser.model.path || "";
               const context = docManager.contextForWidget(app.shell.currentWidget);
 
-              let type = send_widget.getType();
-              let email = send_widget.getEmail();
-              let code = send_widget.getCode();
-              let to = send_widget.getTo();
-              let subject = send_widget.getSubject();
-              let also_attach = send_widget.getAlsoAttach();
-              let template = send_widget.getTemplate();
-              let signature = send_widget.getSignature();
-              let header = send_widget.getHeader();
-              let footer = send_widget.getFooter();
+              const type = send_widget.getType();
+              // tslint:disable-next-line: no-shadowed-variable
+              const email = send_widget.getEmail();
+              const code = send_widget.getCode();
+              const to = send_widget.getTo();
+              const subject = send_widget.getSubject();
+              const also_attach = send_widget.getAlsoAttach();
+              const template = send_widget.getTemplate();
+              const signature = send_widget.getSignature();
+              const header = send_widget.getHeader();
+              const footer = send_widget.getFooter();
 
-              let path = '';
+              let path = "";
               let model = {};
-              if(context){
-                path = context.path; 
+              if (context) {
+                path = context.path;
                 model = context.model.toJSON();
               }
 
-              return new Promise(function(resolve) {
-                request('post',
+              return new Promise((resolve) => {
+                request("post",
                   PageConfig.getBaseUrl() + "email/run",
                   {},
-                  JSON.stringify({'folder': folder,
-                                         'path': path,
-                                         'model': model,
-                                         'type': type,
-                                         'email': email,
-                                         'code': code,
-                                         'subject': subject,
-                                         'to': to,
-                                         'also_attach': also_attach,
-                                         'template': template,
-                                         'signature': signature,
-                                         'header': header,
-                                         'footer': footer
-                                       })
-                  ).then((res:RequestResult) =>{
-                  if(res.ok){
+                    JSON.stringify({
+                      also_attach,
+                      code,
+                      email,
+                      folder,
+                      footer,
+                      header,
+                      model,
+                      path,
+                      signature,
+                      subject,
+                      template,
+                      to,
+                      type,
+                    }),
+                  ).then(
+                    // tslint:disable-next-line: no-shadowed-variable
+                    (res: IRequestResult) => {
+                  if (res.ok) {
                     showDialog({
-                        title: 'Mail sent!',
-                        buttons: [Dialog.okButton({ label: 'Ok' })]
-                      }).then(() => {resolve();})
+                        buttons: [Dialog.okButton({ label: "Ok" })],
+                        title: "Mail sent!",
+                      }).then(() => {resolve(); });
                   } else {
                     showDialog({
-                        title: 'Something went wrong!',
-                        body: 'Check the Jupyter logs for the exception.',
-                        buttons: [Dialog.okButton({ label: 'Ok' })]
-                      }).then(() => {resolve();})
+                        body: "Check the Jupyter logs for the exception.",
+                        buttons: [Dialog.okButton({ label: "Ok" })],
+                        title: "Something went wrong!",
+                      }).then(() => {resolve(); });
                   }
                 });
               });
             });
-          }
+          },
+          isEnabled: () => {
+            if (app.shell.currentWidget &&
+              docManager.contextForWidget(app.shell.currentWidget) &&
+              docManager.contextForWidget(app.shell.currentWidget).model) {
+              return true;
+            }
+            return false;
+          },
+          label: command1,
         });
 
-        palette.addItem({command: command1, category: 'Email'});
+      palette.addItem({command: command1, category: "Email"});
 
-        const menu = new Menu({ commands });
-        menu.title.label = 'Send Emails';
+      const menu = new Menu({ commands });
+      menu.title.label = "Send Emails";
 
-        app.restored.then(() => {
-          all_emails1.forEach(command => {
-            menu.addItem({command, args: {}})
+      app.restored.then(() => {
+          all_emails1.forEach((command) => {
+            menu.addItem({command, args: {}});
           });
 
           if (mainMenu && !loaded) {
             loaded = true;
-            mainMenu.fileMenu.addGroup([{ type:'submenu', submenu: menu }], 11);
+            mainMenu.fileMenu.addGroup([{ type: "submenu", submenu: menu }], 11);
           }
         });
       }
     }
   });
-  console.log('JupyterLab extension jupyterlab_email is activated!');
-};
+  // tslint:disable-next-line:no-console
+  console.log("JupyterLab extension jupyterlab_email is activated!");
+}
 
 export default extension;
 export {activate as _activate};
 
+// tslint:disable-next-line:no-namespace
 namespace Private {
-    let default_none = document.createElement('option');
+    const default_none = document.createElement("option");
     default_none.selected = false;
     default_none.disabled = true;
     default_none.hidden = false;
-    default_none.style.display = 'none';
-    default_none.value = '';
+    default_none.style.display = "none";
+    default_none.value = "";
 
-  export 
+    export
   function buildLabel(text: string): HTMLLabelElement {
-    let label = document.createElement('label');
+    const label = document.createElement("label");
     label.textContent = text;
     return label;
   }
 
- export 
+    export
   function buildTextarea(text: string): HTMLTextAreaElement {
-    let area = document.createElement('textarea');
+    const area = document.createElement("textarea");
     area.placeholder = text;
-    area.style.marginBottom = '15px';
+    area.style.marginBottom = "15px";
     return area;
   }
 
-
-  export
-  function buildSelect(list: string[], _class = '', def?: string): HTMLSelectElement {
-    let select = document.createElement('select');
+    export
+  function buildSelect(list: string[], _class = "", def?: string): HTMLSelectElement {
+    const select = document.createElement("select");
     select.classList.add(_class);
     select.appendChild(default_none);
-    for(let x of list) {
-      let option = document.createElement('option');
-      option.value = x
+    for (const x of list) {
+      const option = document.createElement("option");
+      option.value = x;
       option.textContent = x;
       select.appendChild(option);
 
-      if (def && x === def){
+      if (def && x === def) {
         option.selected = true;
       }
     }
-    select.style.marginBottom = '15px';
-    select.style.minHeight = '25px';
+    select.style.marginBottom = "15px";
+    select.style.minHeight = "25px";
     return select;
   }
 }
