@@ -1,6 +1,7 @@
 
 div.jupyterlab_email_form {
-    overflow:visible;
+    overflow:scroll;
+    padding-bottom: 25px;
 }
 
 span.jupyterlab_email_open {
@@ -25,6 +26,7 @@ div.jupyterlab_email_form > div {
     display: flex;
     flex-direction: column;
     width: 100%;
+    padding:5px;
 }
 
 div.jupyterlab_email_form > button{
@@ -36,7 +38,7 @@ div.jupyterlab_email_form > div > label,
 div.jupyterlab_email_form > div > div,
 div.jupyterlab_email_form > div > button,
 div.jupyterlab_email_form > div > textarea {
-    width: 100%;
+    width: 90%;
 }
 
 div.jupyterlab_email_form > div > div > select {

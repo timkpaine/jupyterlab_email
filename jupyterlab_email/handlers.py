@@ -40,7 +40,7 @@ class EmailHandler(IPythonHandler):
         self.postprocessors = postprocessors
 
     def post(self):
-        body = json.loads(self.request.body)
+        body = json.loads(tornado.escape.json_decode(request.body))
 
         email = body.get('email', '')
         code = body.get('code', 'code').lower()

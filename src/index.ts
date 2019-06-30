@@ -1,5 +1,5 @@
 import {
-  ILayoutRestorer, JupyterLab, JupyterLabPlugin,
+  ILayoutRestorer, JupyterFrontEnd, JupyterFrontEndPlugin,
 } from "@jupyterlab/application";
 
 import {
@@ -42,7 +42,7 @@ import "../style/index.css";
 
 // tslint:disable: variable-name
 
-const extension: JupyterLabPlugin<void> = {
+const extension: JupyterFrontEndPlugin<void> = {
   activate,
   autoStart: true,
   id: "jupyterlab_email",
@@ -236,7 +236,7 @@ class SendEmailWidget extends Widget {
   }
 }
 
-function activate(app: JupyterLab,
+function activate(app: JupyterFrontEnd,
                   docManager: IDocumentManager,
                   palette: ICommandPalette,
                   restorer: ILayoutRestorer,
@@ -325,22 +325,20 @@ function activate(app: JupyterLab,
                 request("post",
                   PageConfig.getBaseUrl() + "email/run",
                   {},
-                    JSON.stringify({
-                      also_attach,
-                      code,
-                      email,
-                      folder,
-                      footer,
-                      header,
-                      model,
-                      path,
-                      signature,
-                      subject,
-                      template,
-                      to,
-                      type,
-                    }),
-                  ).then(
+                  {also_attach,
+                   code,
+                   email,
+                   folder,
+                   footer,
+                   header,
+                   model,
+                   path,
+                   signature,
+                   subject,
+                   template,
+                   to,
+                   type,
+                  }).then(
                     // tslint:disable-next-line: no-shadowed-variable
                     (res: IRequestResult) => {
                   if (res.ok) {
