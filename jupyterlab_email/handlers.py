@@ -3,6 +3,7 @@ import os
 import os.path
 from notebook.base.handlers import IPythonHandler
 from ._email import make_email, email as email_smtp
+import tornado.escape
 
 
 def get_template(type, code, template, handler):
@@ -40,7 +41,7 @@ class EmailHandler(IPythonHandler):
         self.postprocessors = postprocessors
 
     def post(self):
-        body = json.loads(tornado.escape.json_decode(request.body))
+        body = json.loads(tornado.escape.json_decode(self.request.body))
 
         email = body.get('email', '')
         code = body.get('code', 'code').lower()
