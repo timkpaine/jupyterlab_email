@@ -295,7 +295,7 @@ function activate(app: JupyterFrontEnd,
               buttons: [Dialog.cancelButton(), Dialog.okButton({ label: "Ok" })],
               title: "Send email:",
             }).then((result) => {
-              if (result.button.label === "CANCEL") {
+              if (result.button.label === "Cancel") {
                 return;
               }
 
