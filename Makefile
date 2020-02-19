@@ -2,10 +2,10 @@ testjs: ## Clean and Make js tests
 	yarn test
 
 testpy: ## Clean and Make unit tests
-	python3 -m pytest -v tests --cov=jupyterlab_email
+	python3.7 -m pytest -v tests --cov=jupyterlab_email
 
-test: lint ## run the tests for travis CI
-	@ python3 -m pytest -v tests --cov=jupyterlab_email
+tests: lint ## run the tests
+	python3.7 -m pytest -v tests --cov=jupyterlab_email --junitxml=python_junit.xml --cov-report=xml --cov-branch
 	yarn test
 
 lint: ## run linter
@@ -44,8 +44,8 @@ labextension: js ## enable labextension
 
 dist: js  ## dist to pypi
 	rm -rf dist build
-	python3 setup.py sdist
-	python3 setup.py bdist_wheel
+	python3.7 setup.py sdist
+	python3.7 setup.py bdist_wheel
 	twine check dist/* && twine upload dist/*
 
 # Thanks to Francoise at marmelab.com for this
