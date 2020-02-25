@@ -2,15 +2,19 @@ testjs: ## Clean and Make js tests
 	yarn test
 
 testpy: ## Clean and Make unit tests
-	python3.7 -m pytest -v tests --cov=jupyterlab_email
+	python3.7 -m pytest -v jupyterlab_email/tests --cov=jupyterlab_email
 
 tests: lint ## run the tests
-	python3.7 -m pytest -v tests --cov=jupyterlab_email --junitxml=python_junit.xml --cov-report=xml --cov-branch
+	python3.7 -m pytest -v jupyterlab_email/tests --cov=jupyterlab_email --junitxml=python_junit.xml --cov-report=xml --cov-branch
 	yarn test
 
 lint: ## run linter
 	flake8 jupyterlab_email 
 	yarn lint
+
+fix:  ## run autopep8/tslint fix
+	autopep8 --in-place -r -a -a jupyterlab_celltests/
+	./node_modules/.bin/tslint --fix src/*
 
 annotate: ## MyPy type annotation check
 	mypy -s jupyterlab_email

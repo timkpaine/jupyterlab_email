@@ -81,3 +81,5 @@ def latex(expression):
     plt.text(0, 0.6, r'$%s$' % expression, fontsize=25)
     plt.show()
 ```
+
+
