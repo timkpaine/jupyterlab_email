@@ -18,8 +18,25 @@ version = get_version(pjoin(here, name, '_version.py'))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
-    requires = f.read().split()
+
+requires = [
+    'bs4>=0.0.1',
+    'emails>=0.5.15',
+    'ipython>=7.2.0',
+    'jupyterlab>=1.0.0',
+    'pandas>=0.23.4',
+    'python-magic>=0.4.15',
+]
+
+dev_requires = requires + [
+    'autopep8',
+    'pytest',
+    'pytest-cov',
+    'pylint',
+    'flake8',
+    'bump2version',
+    'mock',
+]
 
 
 data_spec = [
@@ -70,7 +87,7 @@ setup(
     packages=find_packages(exclude=['tests', ]),
     install_requires=requires,
     extras_require={
-        'dev': ['pytest', 'pytest-cov', 'pylint', 'flake8', 'bumpversion', 'mock']
+        'dev': dev_requires,
     },
     include_package_data=True,
     zip_safe=False,

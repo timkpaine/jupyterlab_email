@@ -9,24 +9,24 @@ tests: lint ## run the tests
 	yarn test
 
 lint: ## run linter
-	flake8 jupyterlab_email 
+	flake8 jupyterlab_email setup.py
 	yarn lint
 
 fix:  ## run autopep8/tslint fix
-	autopep8 --in-place -r -a -a jupyterlab_celltests/
+	autopep8 --in-place -r -a -a jupyterlab_email/
 	./node_modules/.bin/tslint --fix src/*
 
 annotate: ## MyPy type annotation check
 	mypy -s jupyterlab_email
 
 annotate_l: ## MyPy type annotation check - count only
-	mypy -s jupyterlab_email | wc -l 
+	mypy -s jupyterlab_email | wc -l
 
 clean: ## clean the repository
-	find . -name "__pycache__" | xargs  rm -rf 
-	find . -name "*.pyc" | xargs rm -rf 
-	find . -name ".ipynb_checkpoints" | xargs  rm -rf 
-	rm -rf .coverage cover htmlcov logs build dist *.egg-info lib node_modules
+	find . -name "__pycache__" | xargs  rm -rf
+	find . -name "*.pyc" | xargs rm -rf
+	find . -name ".ipynb_checkpoints" | xargs  rm -rf
+	rm -rf .coverage coverage cover htmlcov logs build dist *.egg-info lib node_modules
 	# make -C ./docs clean
 
 docs:  ## make documentation
@@ -39,10 +39,6 @@ install:  ## install to site-packages
 serverextension: install ## enable serverextension
 	jupyter serverextension enable --py jupyterlab_email
 
-fix:  ## run autopep8/tslint fix
-	autopep8 --in-place -r -a -a jupyterlab_email/
-	./node_modules/.bin/tslint --fix src/ts/**/*.ts
-
 js:  ## build javascript
 	yarn
 	yarn build
@@ -50,11 +46,13 @@ js:  ## build javascript
 labextension: js ## enable labextension
 	jupyter labextension install .
 
-dist: js  ## dist to pypi
+dist: js  ## create dists
 	rm -rf dist build
-	python3.7 setup.py sdist
-	python3.7 setup.py bdist_wheel
+	python3.7 setup.py sdist bdist_wheel
+
+publish: dist  ## dist to pypi and npm
 	twine check dist/* && twine upload dist/*
+	npm publish
 
 # Thanks to Francoise at marmelab.com for this
 .DEFAULT_GOAL := help

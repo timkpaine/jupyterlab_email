@@ -16,7 +16,7 @@ import {
 
 import {
   Menu,
-} from "@phosphor/widgets";
+} from "@lumino/widgets";
 
 import {
   IFileBrowserFactory,
@@ -32,7 +32,7 @@ import {
 
 import {
   Widget,
-} from "@phosphor/widgets";
+} from "@lumino/widgets";
 
 import {
   IRequestResult, request,
