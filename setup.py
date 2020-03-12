@@ -64,7 +64,9 @@ cmdclass['js'] = combine_commands(
 setup(
     name=name,
     version=version,
-    description='Sending emails from JupyterLab',    long_description=long_description,
+    description='Sending emails from JupyterLab',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/timkpaine/jupyterlab_email',
     author='Tim Paine',
     author_email='t.paine154@gmail.com',
