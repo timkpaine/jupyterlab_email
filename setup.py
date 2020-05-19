@@ -21,7 +21,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 
 requires = [
-    'bs4>=0.0.1',
+    'beautifulsoup4>=4.9.1',
     'emails>=0.5.15',
     'ipython>=7.2.0',
     'jupyterlab>=1.0.0',
