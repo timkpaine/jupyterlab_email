@@ -52,14 +52,14 @@ const extension: JupyterFrontEndPlugin<void> = {
 
 export
 class SendEmailWidget extends Widget {
-  constructor(accounts: string[] = [],
-              hide_code: boolean = false,
-              account_name: string = "",
-              templates: string[] = [],
-              signatures: string[] = [],
-              headers: string[] = [],
-              footers: string[] = [],
-              ) {
+  public constructor(accounts: string[] = [],
+                     hide_code = false,
+                     account_name = "",
+                     templates: string[] = [],
+                     signatures: string[] = [],
+                     headers: string[] = [],
+                     footers: string[] = [],
+  ) {
     const body = document.createElement("div");
     body.style.display = "flex";
     body.style.flexDirection = "column";
@@ -96,12 +96,8 @@ class SendEmailWidget extends Widget {
     advanced_button_open.appendChild(advanced_span_open);
     advanced_button_close.appendChild(advanced_span_close);
     advanced_span_open.classList.add("jupyterlab_email_open");
-    advanced_span_open.classList.add("jp-Icon");
-    advanced_span_open.classList.add("jp-Icon-16");
 
     advanced_span_close.classList.add("jupyterlab_email_close");
-    advanced_span_close.classList.add("jp-Icon");
-    advanced_span_close.classList.add("jp-Icon-16");
 
     body.appendChild(advanced_label);
     body.appendChild(advanced_button_open);
@@ -113,15 +109,15 @@ class SendEmailWidget extends Widget {
     advanced_button_close.style.display = "none";
 
     advanced_button_open.onclick = () => {
-        advanced.style.display = "block";
-        advanced_button_open.style.display = "none";
-        advanced_button_close.style.display = "block";
+      advanced.style.display = "block";
+      advanced_button_open.style.display = "none";
+      advanced_button_close.style.display = "block";
     };
 
     advanced_button_close.onclick = () => {
-        advanced.style.display = "none";
-        advanced_button_open.style.display = "block";
-        advanced_button_close.style.display = "none";
+      advanced.style.display = "none";
+      advanced_button_open.style.display = "block";
+      advanced_button_close.style.display = "none";
     };
 
     if (accounts.length > 0) {
@@ -195,44 +191,44 @@ class SendEmailWidget extends Widget {
     return this.footerNode ? this.footerNode.value : "";
   }
 
-  get typeNode(): HTMLSelectElement {
-    return this.node.getElementsByTagName("select")[0] as HTMLSelectElement;
+  public get typeNode(): HTMLSelectElement {
+    return this.node.getElementsByTagName("select")[0];
   }
 
-  get codeNode(): HTMLSelectElement {
-    return this.node.getElementsByTagName("select")[1] as HTMLSelectElement;
+  public get codeNode(): HTMLSelectElement {
+    return this.node.getElementsByTagName("select")[1];
   }
 
-  get emailNode(): HTMLSelectElement {
-    return this.node.getElementsByTagName("select")[2] as HTMLSelectElement;
+  public get emailNode(): HTMLSelectElement {
+    return this.node.getElementsByTagName("select")[2];
   }
 
-  get toNode(): HTMLTextAreaElement {
-    return this.node.getElementsByTagName("textarea")[0] as HTMLTextAreaElement;
+  public get toNode(): HTMLTextAreaElement {
+    return this.node.getElementsByTagName("textarea")[0];
   }
 
-  get subjectNode(): HTMLTextAreaElement {
-    return this.node.getElementsByTagName("textarea")[1] as HTMLTextAreaElement;
+  public get subjectNode(): HTMLTextAreaElement {
+    return this.node.getElementsByTagName("textarea")[1];
   }
 
-  get alsoAttachNode(): HTMLSelectElement {
-    return this.node.getElementsByTagName("select")[3] as HTMLSelectElement;
+  public get alsoAttachNode(): HTMLSelectElement {
+    return this.node.getElementsByTagName("select")[3];
   }
 
-  get templateNode(): HTMLSelectElement {
-    return this.node.querySelector("select.templates") as HTMLSelectElement;
+  public get templateNode(): HTMLSelectElement {
+    return this.node.querySelector("select.templates");
   }
 
-  get signatureNode(): HTMLSelectElement {
-    return this.node.querySelector("select.signatures") as HTMLSelectElement;
+  public get signatureNode(): HTMLSelectElement {
+    return this.node.querySelector("select.signatures");
   }
 
-  get headerNode(): HTMLSelectElement {
-    return this.node.querySelector("select.headers") as HTMLSelectElement;
+  public get headerNode(): HTMLSelectElement {
+    return this.node.querySelector("select.headers");
   }
 
-  get footerNode(): HTMLSelectElement {
-    return this.node.querySelector("select.footers") as HTMLSelectElement;
+  public get footerNode(): HTMLSelectElement {
+    return this.node.querySelector("select.footers");
   }
 }
 
@@ -256,7 +252,7 @@ function activate(app: JupyterFrontEnd,
   // grab templates from serverextension
   request("get", PageConfig.getBaseUrl() + "email/get").then((res: IRequestResult) => {
     if (res.ok) {
-      const info = res.json() as {[key: string]: string};
+      const info: any = res.json();
 
       for (const template of info.templates) {
         all_templates.push(template);
@@ -276,21 +272,21 @@ function activate(app: JupyterFrontEnd,
 
       for (const email of info.emails) {
 
-      const command1 = "send-email:" + email;
+        const command1 = "send-email:" + email;
 
-      all_accounts.push(email);
-      all_emails1.push(command1);
+        all_accounts.push(email);
+        all_emails1.push(command1);
 
-      const send_widget = new SendEmailWidget(all_accounts,
-                                              false,
-                                              email,
-                                              all_templates,
-                                              all_signatures,
-                                              all_headers,
-                                              all_footers);
-      app.commands.addCommand(command1, {
-        execute: () => {
-          showDialog({
+        const send_widget = new SendEmailWidget(all_accounts,
+          false,
+          email,
+          all_templates,
+          all_signatures,
+          all_headers,
+          all_footers);
+        app.commands.addCommand(command1, {
+          execute: () => {
+            showDialog({
               body: send_widget,
               buttons: [Dialog.cancelButton(), Dialog.okButton({ label: "Ok" })],
               title: "Send email:",
@@ -303,7 +299,7 @@ function activate(app: JupyterFrontEnd,
               const context = docManager.contextForWidget(app.shell.currentWidget);
 
               const type = send_widget.getType();
-              // tslint:disable-next-line: no-shadowed-variable
+              // eslint-disable-next-line no-shadow
               const email = send_widget.getEmail();
               const code = send_widget.getCode();
               const to = send_widget.getTo();
@@ -326,34 +322,38 @@ function activate(app: JupyterFrontEnd,
                   PageConfig.getBaseUrl() + "email/run",
                   {},
                   {also_attach,
-                   code,
-                   email,
-                   folder,
-                   footer,
-                   header,
-                   model,
-                   path,
-                   signature,
-                   subject,
-                   template,
-                   to,
-                   type,
+                    code,
+                    email,
+                    folder,
+                    footer,
+                    header,
+                    model,
+                    path,
+                    signature,
+                    subject,
+                    template,
+                    to,
+                    type,
                   }).then(
-                    // tslint:disable-next-line: no-shadowed-variable
-                    (res: IRequestResult) => {
-                  if (res.ok) {
-                    showDialog({
+                  // eslint-disable-next-line no-shadow
+                  (res: IRequestResult) => {
+                    if (res.ok) {
+                      showDialog({
                         buttons: [Dialog.okButton({ label: "Ok" })],
                         title: "Mail sent!",
-                      }).then(() => {resolve(); });
-                  } else {
-                    showDialog({
+                      }).then(() => {
+                        resolve();
+                      });
+                    } else {
+                      showDialog({
                         body: "Check the Jupyter logs for the exception.",
                         buttons: [Dialog.okButton({ label: "Ok" })],
                         title: "Something went wrong!",
-                      }).then(() => {resolve(); });
-                  }
-                });
+                      }).then(() => {
+                        resolve();
+                      });
+                    }
+                  });
               });
             });
           },
@@ -368,12 +368,12 @@ function activate(app: JupyterFrontEnd,
           label: command1,
         });
 
-      palette.addItem({command: command1, category: "Email"});
+        palette.addItem({command: command1, category: "Email"});
 
-      const menu = new Menu({ commands });
-      menu.title.label = "Send Emails";
+        const menu = new Menu({ commands });
+        menu.title.label = "Send Emails";
 
-      app.restored.then(() => {
+        app.restored.then(() => {
           all_emails1.forEach((command) => {
             menu.addItem({command, args: {}});
           });
@@ -386,30 +386,30 @@ function activate(app: JupyterFrontEnd,
       }
     }
   });
-  // tslint:disable-next-line:no-console
+  // eslint-disable-next-line no-console
   console.log("JupyterLab extension jupyterlab_email is activated!");
 }
 
 export default extension;
 export {activate as _activate};
 
-// tslint:disable-next-line:no-namespace
+// eslint-disable-next-line @typescript-eslint/no-namespace
 namespace Private {
-    const default_none = document.createElement("option");
-    default_none.selected = false;
-    default_none.disabled = true;
-    default_none.hidden = false;
-    default_none.style.display = "none";
-    default_none.value = "";
+  const default_none = document.createElement("option");
+  default_none.selected = false;
+  default_none.disabled = true;
+  default_none.hidden = false;
+  default_none.style.display = "none";
+  default_none.value = "";
 
-    export
+  export
   function buildLabel(text: string): HTMLLabelElement {
     const label = document.createElement("label");
     label.textContent = text;
     return label;
   }
 
-    export
+  export
   function buildTextarea(text: string): HTMLTextAreaElement {
     const area = document.createElement("textarea");
     area.placeholder = text;
@@ -417,7 +417,7 @@ namespace Private {
     return area;
   }
 
-    export
+  export
   function buildSelect(list: string[], _class = "", def?: string): HTMLSelectElement {
     const select = document.createElement("select");
     select.classList.add(_class);

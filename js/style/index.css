@@ -4,16 +4,16 @@ div.jupyterlab_email_form {
     padding-bottom: 25px;
 }
 
-span.jupyterlab_email_open {
-    background-image: var(--jp-icon-caretdown);
+span.jupyterlab_email_open:after {
+    content: "\25BC";
     min-height:16px;
     min-width:16px;
     background-size: 16px;
     display:block;
 }   
 
-span.jupyterlab_email_close {
-    background-image: var(--jp-icon-caretup);
+span.jupyterlab_email_close:after {
+    content: "\25B2";
     min-height:16px;
     min-width:16px;
     background-size: 16px;
@@ -39,10 +39,6 @@ div.jupyterlab_email_form > div > div,
 div.jupyterlab_email_form > div > button,
 div.jupyterlab_email_form > div > textarea {
     width: 90%;
-}
-
-div.jupyterlab_email_form > div > div > select {
-    width: 75%;
 }
 
 div.jupyterlab_email_form div.jp-select-wrapper {
