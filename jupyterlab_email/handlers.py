@@ -1,12 +1,13 @@
 import json
 import os
 import os.path
+import logging
+import tornado.escape
 from notebook.base.handlers import IPythonHandler
 from ._email import make_email, email as email_smtp
-import tornado.escape
 
 
-def get_template(type, code, template, handler):
+def get_template(type, code, template, handler, user_templates={}):
     if 'email' in type:
         if code == 'code':
             return handler.templates['email']
@@ -71,7 +72,7 @@ class EmailHandler(IPythonHandler):
             elif also_attach == 'both':
                 also_attach = 'html'
 
-        print('converting to <%s> with template <%s>' % (type, template))
+        logging.critical('converting to <%s> with template <%s>' % (type, template))
         path = os.path.join(os.getcwd(), body.get('path'))
         model = body.get('model')
 

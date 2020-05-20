@@ -3,6 +3,7 @@ import sys
 import re
 import os
 import os.path
+import logging
 import html
 import tempfile
 import subprocess
@@ -101,6 +102,5 @@ def run(to='html',
             return ret, 0
 
     except Exception as e:
-        print(e)
-        raise e
+        logging.critical(e)
         return None, 1

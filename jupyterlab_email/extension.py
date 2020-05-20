@@ -1,5 +1,6 @@
 import os
 import os.path
+import logging
 from getpass import getpass
 from notebook.utils import url_path_join
 from .handlers import EmailHandler, EmailsListHandler
@@ -15,6 +16,7 @@ def load_jupyter_server_extension(nb_server_app):
     web_app = nb_server_app.web_app
     emails = nb_server_app.config.get('JupyterLabEmail', {}).get('smtp_servers', {})
 
+    # should map "type" to template e.g. email->[list of templates], html->[list of templates], pdf->[list of templates]
     user_templates = nb_server_app.config.get('JupyterLabEmail', {}).get('templates', {})
     headers = nb_server_app.config.get('JupyterLabEmail', {}).get('headers', {})
     footers = nb_server_app.config.get('JupyterLabEmail', {}).get('footers', {})
@@ -24,14 +26,14 @@ def load_jupyter_server_extension(nb_server_app):
     base_url = web_app.settings['base_url']
 
     host_pattern = '.*$'
-    print('Installing jupyterlab_email handler on path %s' % url_path_join(base_url, 'emails'))
-    print('Available email servers: %s' % ','.join(k['name'] for k in emails))
+    logging.critical('Installing jupyterlab_email handler on path %s' % url_path_join(base_url, 'emails'))
+    logging.critical('Available email servers: %s' % ','.join(k['name'] for k in emails))
 
     for k in emails:
         if 'password' in k:
-            print('WARNING!!! You should not store your password in jupyter_notebook_config.py!!!')
+            logging.critical('WARNING!!! You should not store your password in jupyter_notebook_config.py!!!')
         elif 'function' in k:
-            print('Skipping password input for %s@%s' % (k['username'], k['name']))
+            logging.critical('Skipping password input for %s@%s' % (k['username'], k['name']))
         else:
             k['password'] = getpass('Input password for %s@%s:' % (k['username'], k['name']))
 
@@ -41,8 +43,8 @@ def load_jupyter_server_extension(nb_server_app):
     context['footers'] = footers
     context['signatures'] = signatures
     context['postprocessors'] = postprocessors
-    context['templates'] = {}
     context['user_templates'] = user_templates
+    context['templates'] = {}
     context['templates']['email'] = os.path.join(os.path.dirname(__file__), 'templates', 'html_email.tpl')
     context['templates']['email_nocode'] = os.path.join(os.path.dirname(__file__), 'templates', 'hide_code_cells_html_email.tpl')
     context['templates']['html'] = os.path.join(os.path.dirname(__file__), 'templates', 'html.tpl')

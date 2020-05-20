@@ -82,8 +82,14 @@ class SendEmailWidget extends Widget {
     const advanced = document.createElement("div");
     advanced.style.flex = "1";
 
+    const expand_div = document.createElement("div");
+    expand_div.style.display = "flex";
+    expand_div.style.flexDirection = "row";
+
     const advanced_label = document.createElement("label");
     advanced_label.textContent = "Advanced";
+
+    expand_div.appendChild(advanced_label);
 
     const advanced_button_open = document.createElement("button");
     const advanced_span_open = document.createElement("span");
@@ -99,9 +105,10 @@ class SendEmailWidget extends Widget {
 
     advanced_span_close.classList.add("jupyterlab_email_close");
 
-    body.appendChild(advanced_label);
-    body.appendChild(advanced_button_open);
-    body.appendChild(advanced_button_close);
+    expand_div.appendChild(advanced_button_open);
+    expand_div.appendChild(advanced_button_close);
+
+    body.appendChild(expand_div);
     body.appendChild(advanced);
 
     advanced.style.display = "none";

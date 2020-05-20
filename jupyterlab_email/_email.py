@@ -1,6 +1,7 @@
 import json
 import emails
 import base64
+import logging
 import nbformat
 from bs4 import BeautifulSoup
 from six import iteritems
@@ -54,13 +55,20 @@ def make_email(path,
         message = emails.html(charset='utf-8', subject=subject, html=nb, mail_from=from_)
         return message, error
 
-    if also_attach in ('pdf', 'both'):
-        pdf_nb = run('pdf', name, model, also_attach_pdf_template)
-    if also_attach in ('html', 'both'):
-        html_nb = run('html', name, model, also_attach_html_template)
-
     if not nb:
         raise Exception('Something went wrong with NBConvert')
+
+    if also_attach in ('pdf', 'both'):
+        pdf_nb, error1 = run('pdf', name, model, also_attach_pdf_template)
+        error += error1
+    if also_attach in ('html', 'both'):
+        html_nb, error2 = run('html', name, model, also_attach_html_template)
+        error += error2
+
+    if error:
+        # from pdf or html conversion specifically
+        message = emails.html(charset='utf-8', subject=subject, html=nb, mail_from=from_)
+        return message, error
 
     if type == 'email':
         soup = BeautifulSoup(nb, 'html.parser')
@@ -141,7 +149,9 @@ def make_email(path,
 
         if also_attach in ('html', 'both'):
             message.attach(filename=name + '.html', data=html_nb)
+
         return message, 0
+
     message = emails.html(subject=subject, html='<html>Attachment: %s.%s</html>' % (name, type_to), mail_from=from_)
     message.attach(filename=name + '.' + type_to, data=nb)
 
@@ -170,6 +180,6 @@ def email(message, to, username, password, domain, host, port):
                            'user': username,
                            'password': password})
     if r.status_code != 250:
-        print(r)
+        logging.critical(r)
         raise Exception('Email exception! Check username and password')
     return r
