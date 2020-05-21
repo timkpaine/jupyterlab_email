@@ -59,6 +59,9 @@ class SendEmailWidget extends Widget {
                      signatures: string[] = [],
                      headers: string[] = [],
                      footers: string[] = [],
+                     user_templates: string[] = [],
+                     postprocessors: string[] = [],
+
   ) {
     const body = document.createElement("div");
     body.style.display = "flex";
@@ -140,6 +143,11 @@ class SendEmailWidget extends Widget {
       advanced.appendChild(Private.buildSelect(templates, "templates"));
     }
 
+    if (user_templates.length > 0) {
+      advanced.appendChild(Private.buildLabel("User Templates (Overrides 'builtin' template choice):"));
+      advanced.appendChild(Private.buildSelect(user_templates, "user_template"));
+    }
+
     if (signatures.length > 0) {
       advanced.appendChild(Private.buildLabel("Signature:"));
       advanced.appendChild(Private.buildSelect(signatures, "signatures"));
@@ -153,6 +161,11 @@ class SendEmailWidget extends Widget {
     if (footers.length > 0) {
       advanced.appendChild(Private.buildLabel("Footer:"));
       advanced.appendChild(Private.buildSelect(footers, "footers"));
+    }
+
+    if (postprocessors.length > 0) {
+      advanced.appendChild(Private.buildLabel("Post Processors:"));
+      advanced.appendChild(Private.buildSelect(postprocessors, "postprocessor"));
     }
 
     super({ node: body });
@@ -198,6 +211,14 @@ class SendEmailWidget extends Widget {
     return this.footerNode ? this.footerNode.value : "";
   }
 
+  public getUserTemplate(): string {
+    return this.userTemplateNode ? this.userTemplateNode.value : "";
+  }
+
+  public getPostprocessor(): string {
+    return this.userTemplateNode ? this.userTemplateNode.value : "";
+  }
+
   public get typeNode(): HTMLSelectElement {
     return this.node.getElementsByTagName("select")[0];
   }
@@ -237,6 +258,14 @@ class SendEmailWidget extends Widget {
   public get footerNode(): HTMLSelectElement {
     return this.node.querySelector("select.footers");
   }
+
+  public get userTemplateNode(): HTMLSelectElement {
+    return this.node.querySelector("select.user_template");
+  }
+
+  public get postprocessorNode(): HTMLSelectElement {
+    return this.node.querySelector("select.postprocessor");
+  }
 }
 
 function activate(app: JupyterFrontEnd,
@@ -251,6 +280,7 @@ function activate(app: JupyterFrontEnd,
   const all_emails1: string[] = [];
   const all_accounts: string[] = [];
   const all_templates: string[] = [];
+  const all_user_templates: string[] = [];
   const all_signatures: string[] = [];
   const all_headers: string[] = [];
   const all_footers: string[] = [];
@@ -263,6 +293,10 @@ function activate(app: JupyterFrontEnd,
 
       for (const template of info.templates) {
         all_templates.push(template);
+      }
+
+      for (const template of info.user_templates) {
+        all_user_templates.push(template);
       }
 
       for (const signature of info.signatures) {
@@ -290,7 +324,8 @@ function activate(app: JupyterFrontEnd,
           all_templates,
           all_signatures,
           all_headers,
-          all_footers);
+          all_footers,
+          all_user_templates);
         app.commands.addCommand(command1, {
           execute: () => {
             showDialog({
@@ -313,9 +348,11 @@ function activate(app: JupyterFrontEnd,
               const subject = send_widget.getSubject();
               const also_attach = send_widget.getAlsoAttach();
               const template = send_widget.getTemplate();
+              const user_template = send_widget.getUserTemplate();
               const signature = send_widget.getSignature();
               const header = send_widget.getHeader();
               const footer = send_widget.getFooter();
+              const postprocessor = send_widget.getPostprocessor();
 
               let path = "";
               let model = {};
@@ -336,12 +373,15 @@ function activate(app: JupyterFrontEnd,
                     header,
                     model,
                     path,
+                    postprocessor,
                     signature,
                     subject,
                     template,
                     to,
                     type,
-                  }).then(
+                    user_template,
+                  },
+                  {timeout: 30000}).then(
                   // eslint-disable-next-line no-shadow
                   (res: IRequestResult) => {
                     if (res.ok) {

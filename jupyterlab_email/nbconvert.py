@@ -3,10 +3,12 @@ import sys
 import re
 import os
 import os.path
-import logging
 import html
-import tempfile
+import logging
 import subprocess
+import tempfile
+import traceback
+
 
 _COLOR_CODES = {
     'black': r'(?:\x1b[^m]\d\;30m)([^\x1b]*)',
@@ -68,6 +70,7 @@ def run(to='html',
 
             # extract out the cell error
             m = re.search('.*CellExecutionError:(?P<CellError>(.*\n)*)', error, flags=re.MULTILINE)
+
             g = m.groupdict()
 
             # dump it in mail
@@ -101,6 +104,6 @@ def run(to='html',
             os.remove(inname)
             return ret, 0
 
-    except Exception as e:
-        logging.critical(e)
-        return None, 1
+    except Exception:
+        logging.critical("Exception: \n" + traceback.format_exc())
+        return "<html><h1>Notebook Run error has occurred - see raw log for details</h1></html>", 1

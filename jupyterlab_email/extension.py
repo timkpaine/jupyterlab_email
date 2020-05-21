@@ -16,8 +16,9 @@ def load_jupyter_server_extension(nb_server_app):
     web_app = nb_server_app.web_app
     emails = nb_server_app.config.get('JupyterLabEmail', {}).get('smtp_servers', {})
 
-    # should map "type" to template e.g. email->[list of templates], html->[list of templates], pdf->[list of templates]
+    # should be a list of template paths
     user_templates = nb_server_app.config.get('JupyterLabEmail', {}).get('templates', {})
+
     headers = nb_server_app.config.get('JupyterLabEmail', {}).get('headers', {})
     footers = nb_server_app.config.get('JupyterLabEmail', {}).get('footers', {})
     signatures = nb_server_app.config.get('JupyterLabEmail', {}).get('signatures', {})
