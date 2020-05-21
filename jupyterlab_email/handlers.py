@@ -1,12 +1,15 @@
 import json
 import os
 import os.path
+import logging
+import tornado.escape
 from notebook.base.handlers import IPythonHandler
 from ._email import make_email, email as email_smtp
-import tornado.escape
 
 
-def get_template(type, code, template, handler):
+def get_template(type, code, template, handler, user_template=''):
+    if user_template:
+        return user_template
     if 'email' in type:
         if code == 'code':
             return handler.templates['email']
@@ -50,12 +53,16 @@ class EmailHandler(IPythonHandler):
         type = body.get('type', 'email').lower()
         also_attach = body.get('also_attach', 'none').lower()
         template = body.get('type')
+        user_template = body.get('user_template', '')
+        postprocessor = body.get('postprocessor', '')
 
         header = self.headers.get(body.get('header', ''), '')
         footer = self.footers.get(body.get('footer', ''), '')
         signature = self.signatures.get(body.get('signature', ''), '')
+        user_template = self.user_templates.get(user_template)
+        postprocessor = self.postprocessors.get(postprocessor)
 
-        template = get_template(type, code, template, self)
+        template = get_template(type, code, template, self, user_template)
         attach_html_template = get_template('html', code, None, self)
         attach_pdf_template = get_template('pdf', code, None, self)
 
@@ -71,7 +78,7 @@ class EmailHandler(IPythonHandler):
             elif also_attach == 'both':
                 also_attach = 'html'
 
-        print('converting to <%s> with template <%s>' % (type, template))
+        logging.critical('converting to <%s> with template <%s>' % (type, template))
         path = os.path.join(os.getcwd(), body.get('path'))
         model = body.get('model')
 
@@ -85,7 +92,8 @@ class EmailHandler(IPythonHandler):
                 message, error = make_email(path, model, account['username'] + '@' + account['domain'],
                                             type, template, code, subject,
                                             header, footer or signature,
-                                            also_attach, attach_pdf_template, attach_html_template)
+                                            also_attach, attach_pdf_template, attach_html_template,
+                                            postprocessor)
                 if error:
                     # set "to" to be "from"
                     to = account['username'] + '@' + account['domain']
@@ -95,11 +103,11 @@ class EmailHandler(IPythonHandler):
                 else:
                     r = email_smtp(message, to,
                                    account['username'], account['password'], account['domain'], account['smtp'], account['port'])
-
-                self.finish(str(r))
                 if error:
+                    self.set_status(500)
                     raise Exception('Error during conversion!')
-                return
+                self.finish(str(r))
+
         raise Exception('Email not found!')
 
 
@@ -115,10 +123,11 @@ class EmailsListHandler(IPythonHandler):
 
     def get(self):
         ret = {}
-        ret['emails'] = [x['name'] for x in self.emails]
-        ret['templates'] = [x for x in self.user_templates]
-        ret['headers'] = [x for x in self.headers]
-        ret['footers'] = [x for x in self.footers]
-        ret['signatures'] = [x for x in self.signatures]
-        ret['postprocessors'] = [x for x in self.postprocessors]
+        ret['emails'] = [_['name'] for _ in self.emails]
+        ret['templates'] = [_ for _ in self.templates]
+        ret['user_templates'] = [''] + [_ for _ in self.user_templates] if self.user_templates else []
+        ret['headers'] = [''] + [_ for _ in self.headers] if self.headers else []
+        ret['footers'] = [''] + [_ for _ in self.footers] if self.footers else []
+        ret['signatures'] = [''] + [_ for _ in self.signatures] if self.signatures else []
+        ret['postprocessors'] = [''] + [_ for _ in self.postprocessors] if self.postprocessors else []
         self.finish(json.dumps(ret))

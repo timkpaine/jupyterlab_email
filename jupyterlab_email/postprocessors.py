@@ -75,16 +75,17 @@ def pivot_pandas_to_excel(soup, show_intermediate_breakdown=False, show_total_br
 
                         # new header to delete formatting
                         new_header = Tag(name='th', attrs={'class': 'empty_pivot_row_first',
-                                                           'style': 'margin-left:' + str(10*(num_headers_max - len(headers) + indent)) + 'px;'}) if first_header else \
+                                                           'style': 'margin-left:' + str(10 * (num_headers_max - len(headers) + indent)) + 'px;'}) if first_header else \
                             Tag(name='th', attrs={'class': 'empty_pivot_row',
-                                                  'style': 'margin-left:' + str(10*(num_headers_max - len(headers) + indent)) + 'px;'})
+                                                  'style': 'margin-left:' + str(10 * (num_headers_max - len(headers) + indent)) + 'px;'})
 
                         new_header.contents = header.contents
                         new_row.insert(0, new_header)
 
                         # fill in blanks for data
-                        for j in range(num_columns_max-1):
-                            new_row.insert(j+1, Tag(name='td', attrs={'class': 'empty_pivot_row_first'})) if first_header else new_row.insert(j+1, Tag(name='td', attrs={'class': 'empty_pivot_row'}))
+                        for j in range(num_columns_max - 1):
+                            new_row.insert(j + 1, Tag(name='td', attrs={'class': 'empty_pivot_row_first'})
+                                           ) if first_header else new_row.insert(j + 1, Tag(name='td', attrs={'class': 'empty_pivot_row'}))
 
                         new_body.insert(bc, new_row)
 
@@ -97,7 +98,7 @@ def pivot_pandas_to_excel(soup, show_intermediate_breakdown=False, show_total_br
 
             # increase pivot indent
             new_header = Tag(name='th', attrs={'class': 'pivot_row_header',
-                                               'style': 'margin-left:' + str(10*(num_headers_max-1)) + 'px;'})
+                                               'style': 'margin-left:' + str(10 * (num_headers_max - 1)) + 'px;'})
             new_header.contents = headers[-1].contents
 
             # change sum total
