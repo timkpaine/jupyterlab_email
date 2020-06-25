@@ -107,7 +107,7 @@ class EmailHandler(IPythonHandler):
                     self.set_status(500)
                     raise Exception('Error during conversion!')
                 self.finish(str(r))
-
+                return
         raise Exception('Email not found!')
 
 
