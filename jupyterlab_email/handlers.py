@@ -3,6 +3,7 @@ import os
 import os.path
 import logging
 import tornado.escape
+import tornado.web
 from notebook.base.handlers import IPythonHandler
 from ._email import make_email, email as email_smtp
 
@@ -43,6 +44,7 @@ class EmailHandler(IPythonHandler):
         self.signatures = signatures
         self.postprocessors = postprocessors
 
+    @tornado.web.authenticated
     def post(self):
         body = tornado.escape.json_decode(self.request.body)
 
@@ -121,6 +123,7 @@ class EmailsListHandler(IPythonHandler):
         self.signatures = signatures
         self.postprocessors = postprocessors
 
+    @tornado.web.authenticated
     def get(self):
         ret = {}
         ret['emails'] = [_['name'] for _ in self.emails]
