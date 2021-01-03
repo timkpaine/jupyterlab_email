@@ -6,6 +6,4 @@ from .extension import load_jupyter_server_extension  # noqa: F401
 
 
 def _jupyter_server_extension_paths():
-    return [{
-        "module": "jupyterlab_email.extension"
-    }]
+    return [{"module": "jupyterlab_email.extension"}]

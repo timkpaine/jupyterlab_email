@@ -11,93 +11,97 @@ import traceback
 
 
 _COLOR_CODES = {
-    'black': r'(?:\x1b[^m]\d\;30m)([^\x1b]*)',
-    'red': r'(?:\x1b[^m]\d\;31m)([^\x1b]*)',
-    'green': r'(?:\x1b[^m]\d\;32m)([^\x1b]*)',
-    'yellow': r'(?:\x1b[^m]\d\;33m)([^\x1b]*)',
-    'blue': r'(?:\x1b[^m]\d\;34m)([^\x1b]*)',
-    'magenta': r'(?:\x1b[^m]\d\;35m)([^\x1b]*)',
-    'cyan': r'(?:\x1b[^m]\d\;36m)([^\x1b]*)',
-    'white': r'(?:\x1b[^m]\d\;37m)([^\x1b]*)'
+    "black": r"(?:\x1b[^m]\d\;30m)([^\x1b]*)",
+    "red": r"(?:\x1b[^m]\d\;31m)([^\x1b]*)",
+    "green": r"(?:\x1b[^m]\d\;32m)([^\x1b]*)",
+    "yellow": r"(?:\x1b[^m]\d\;33m)([^\x1b]*)",
+    "blue": r"(?:\x1b[^m]\d\;34m)([^\x1b]*)",
+    "magenta": r"(?:\x1b[^m]\d\;35m)([^\x1b]*)",
+    "cyan": r"(?:\x1b[^m]\d\;36m)([^\x1b]*)",
+    "white": r"(?:\x1b[^m]\d\;37m)([^\x1b]*)",
 }
 
-_CLOSERS = re.compile(r'(?:\x1b[^m]*m)')
+_CLOSERS = re.compile(r"(?:\x1b[^m]*m)")
 
-with open(os.path.join(os.path.dirname(__file__), 'templates', 'error.tpl'), 'r') as fp:
+with open(os.path.join(os.path.dirname(__file__), "templates", "error.tpl"), "r") as fp:
     _ERROR_TEMPLATE = fp.read()
 
 
-def run(to='html',
-        name='',
-        in_='',
-        template='',
-        execute=False,
-        execute_timeout=600):
+def run(to="html", name="", in_="", template="", execute=False, execute_timeout=600):
     # write notebook string to disk
     _dir = tempfile.mkdtemp()
     inname = os.path.join(_dir, name)
-    with open(inname, 'w') as fp:
+    with open(inname, "w") as fp:
         fp.write(in_)
 
     # output file name
-    outname = name.rsplit('.', 1)[0]
+    outname = name.rsplit(".", 1)[0]
 
     # hack for pdfs
-    if to != 'pdf':
-        outname += '.' + to
+    if to != "pdf":
+        outname += "." + to
 
     # assemble nbconvert command
     argv = []
-    argv = [sys.executable, '-m', 'nbconvert', '--to', to]
+    argv = [sys.executable, "-m", "nbconvert", "--to", to]
 
     # reexecute if needed
     if execute:
-        argv.extend(['--execute', '--ExecutePreprocessor.timeout=' + str(execute_timeout)])
+        argv.extend(
+            ["--execute", "--ExecutePreprocessor.timeout=" + str(execute_timeout)]
+        )
 
     # pass in template arg
     if template:
-        argv.extend(['--template', template])
+        argv.extend(["--template", template])
 
     # output to outname
-    argv.extend([inname, '--output', outname])
+    argv.extend([inname, "--output", outname])
 
     try:
         p = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         _, error = p.communicate()
 
         if p.returncode != 0:
-            error = error.decode('ascii')
+            error = error.decode("ascii")
 
             # extract out the cell error
-            m = re.search('.*CellExecutionError:(?P<CellError>(.*\n)*)', error, flags=re.MULTILINE)
+            m = re.search(
+                ".*CellExecutionError:(?P<CellError>(.*\n)*)", error, flags=re.MULTILINE
+            )
 
             g = m.groupdict()
 
             # dump it in mail
-            err = g['CellError']
+            err = g["CellError"]
 
             # do the escape of <, > before adding real tags
             err = html.escape(err)
 
             # convert escape colors to css colors
             for color, reg in _COLOR_CODES.items():
-                err = re.sub(reg, '<span style="color: {color}">{err}</span> '.format(color=color, err=err))
+                err = re.sub(
+                    reg,
+                    '<span style="color: {color}">{err}</span> '.format(
+                        color=color, err=err
+                    ),
+                )
 
             # remove and closers
-            err = re.sub(_CLOSERS, '', err)
+            err = re.sub(_CLOSERS, "", err)
 
             # return with template
-            ret = _ERROR_TEMPLATE.format(err.replace('\n', '<br>'))
+            ret = _ERROR_TEMPLATE.format(err.replace("\n", "<br>"))
             return ret, 1
 
         else:
             outname = os.path.join(_dir, outname)
 
             # hack for pdfs
-            if to == 'pdf':
-                outname += '.' + to
+            if to == "pdf":
+                outname += "." + to
 
-            with open(outname, 'rb') as fp:
+            with open(outname, "rb") as fp:
                 ret = fp.read()
 
             os.remove(outname)
@@ -106,4 +110,7 @@ def run(to='html',
 
     except Exception:
         logging.critical("Exception: \n" + traceback.format_exc())
-        return "<html><h1>Notebook Run error has occurred - see raw log for details</h1></html>", 1
+        return (
+            "<html><h1>Notebook Run error has occurred - see raw log for details</h1></html>",
+            1,
+        )
