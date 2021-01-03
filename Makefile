@@ -9,11 +9,11 @@ tests: lint ## run the tests
 	cd js; yarn test
 
 lint: ## run linter
-	python -m flake8 jupyterlab_commands setup.py
+	python -m flake8 jupyterlab_email setup.py
 	cd js; yarn lint
 
 fix:  ## run autopep8/tslint fix
-	python -m black jupyterlab_commands/ setup.py
+	python -m black jupyterlab_email/ setup.py
 	cd js; yarn fix
 
 clean: ## clean the repository
