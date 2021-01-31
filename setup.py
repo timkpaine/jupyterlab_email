@@ -50,7 +50,7 @@ data_spec = [
     # Lab extension installed by default:
     ("share/jupyter/lab/extensions", "lab-dist", "jupyterlab_email-*.tgz"),
     # Config to enable server extension by default:
-    ("etc/jupyter", "jupyter-config", "**/*.json"),
+    ("etc/jupyter/jupyter_server_config.d", "jupyter-config", "*.json"),
 ]
 
 
@@ -78,9 +78,9 @@ setup(
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Framework :: Jupyter",
     ],
     cmdclass=cmdclass,

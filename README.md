@@ -2,7 +2,7 @@
 A jupyterlab extension to email notebooks from the browser.
 
 [![Build Status](https://github.com/timkpaine/jupyterlab_email/workflows/Build%20Status/badge.svg?branch=main)](https://github.com/timkpaine/jupyterlab_email/actions?query=workflow%3A%22Build+Status%22)
-[![codecov](https://codecov.io/gh/timkpaine/jupyterlab_email/branch/master/graph/badge.svg)](https://codecov.io/gh/timkpaine/jupyterlab_email)
+[![codecov](https://codecov.io/gh/timkpaine/jupyterlab_email/branch/main/graph/badge.svg)](https://codecov.io/gh/timkpaine/jupyterlab_email)
 [![PyPI](https://img.shields.io/pypi/l/jupyterlab_email.svg)](https://pypi.python.org/pypi/jupyterlab_email)
 [![PyPI](https://img.shields.io/pypi/v/jupyterlab_email.svg)](https://pypi.python.org/pypi/jupyterlab_email)
 [![npm](https://img.shields.io/npm/v/jupyterlab_email.svg)](https://www.npmjs.com/package/jupyterlab_email)
