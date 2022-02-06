@@ -10,21 +10,22 @@
     "jupyterlab-extension"
   ],
   "scripts": {
-    "build": "tsc",
-    "build:lab": "rimraf ../lab-dist && mkdirp ../lab-dist && cd ../lab-dist && npm pack ../js/",
+    "build": "babel src/ --source-maps --out-dir lib/",
+    "build:lab": "rimraf ../jupyterlab_templates/labextension && jupyter labextension build .",
     "build:all": "npm run build && npm run build:lab",
     "clean": "rimraf lib",
-    "fix": "./node_modules/.bin/eslint -c .eslintrc.js --ext .ts --fix src/ tests/",
-    "lint": "./node_modules/.bin/eslint -c .eslintrc.js --ext .ts src/ tests/",
+    "fix": "yarn lint --fix",
+    "lint": "eslint -c .eslintrc.js --ext .js src/ tests/",
     "prepublishOnly": "npm run build",
-    "test": "jest --coverage --collectCoverageFrom=src/*.{ts}"
+    "test": "jest --coverage --collectCoverageFrom=src/*.{js}"
   },
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "style/**/*.css"
   ],
   "jupyterlab": {
-    "extension": true,
+    "extension": "lib/index.js",
+    "outputDir": "../jupyterlab_email/labextension",
     "discovery": {
       "server": {
         "base": {
@@ -37,36 +38,37 @@
     }
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.0.0",
-    "@jupyterlab/apputils": "^2.0.0",
-    "@jupyterlab/coreutils": "^4.0.0",
-    "@jupyterlab/docmanager": "^2.0.0",
-    "@jupyterlab/filebrowser": "^2.0.0",
-    "@jupyterlab/launcher": "^2.0.0",
-    "@jupyterlab/mainmenu": "^2.0.0",
-    "@jupyterlab/notebook": "^2.0.0",
-    "@lumino/disposable": "^1.1.2",
+    "@jupyterlab/application": "^3.1.0",
+    "@jupyterlab/apputils": "^3.1.0",
+    "@jupyterlab/coreutils": "^5.1.0",
+    "@jupyterlab/docmanager": "^3.1.0",
+    "@jupyterlab/filebrowser": "^3.1.0",
+    "@jupyterlab/launcher": "^3.1.0",
+    "@jupyterlab/mainmenu": "^3.1.0",
+    "@jupyterlab/notebook": "^3.1.0",
+    "@lumino/disposable": "^1.7.0",
     "requests-helper": "^0.1.5"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.5.5",
-    "@types/jest": "^24.0.4",
-    "@typescript-eslint/eslint-plugin": "^2.34.0",
-    "@typescript-eslint/eslint-plugin-tslint": "^2.34.0",
-    "@typescript-eslint/parser": "^2.34.0",
-    "babel-jest": "^24.8.0",
-    "eslint": "^7.0.0",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-jsdoc": "^25.4.2",
-    "eslint-plugin-prefer-arrow": "^1.2.1",
-    "eslint-plugin-unicorn": "^20.0.0",
-    "isomorphic-fetch": "^2.2.1",
-    "jest": "^24.1.0",
-    "jest-transform-css": "^2.0.0",
-    "mkdirp": "^0.5.1",
-    "rimraf": "^2.6.1",
-    "ts-jest": "^23.10.4",
-    "tslint": "^5.14.0",
-    "typescript": "^3.1.6"
+    "@babel/cli": "^7.16.0",
+    "@babel/core": "^7.16.0",
+    "@babel/eslint-parser": "^7.16.3",
+    "@babel/preset-env": "^7.16.4",
+    "@jupyterlab/builder": "^3.2.4",
+    "babel-jest": "^27.4.2",
+    "eslint": "^8.4.1",
+    "eslint-config-airbnb": "^19.0.2",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jest": "^25.3.0",
+    "eslint-plugin-json": "^3.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "isomorphic-fetch": "^3.0.0",
+    "jest": "^27.4.3",
+    "jest-transform-css": "^3.0.0",
+    "mkdirp": "^1.0.4",
+    "prettier": "^2.5.1",
+    "rimraf": "^3.0.2"
   }
 }
