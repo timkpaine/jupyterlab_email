@@ -169,3 +169,6 @@ yarn.lock
 docs/api
 docs/index.md
 python_junit.xml
+Untitled*.ipynb
+Untitled*.html
+output*.png
