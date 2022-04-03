@@ -1,21 +1,13 @@
-from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
-from jupyter_packaging import (
-    create_cmdclass,
-    install_npm,
-    ensure_targets,
-    combine_commands,
-    get_version,
-)
+from jupyter_packaging import get_data_files, npm_builder, wrap_installers
+from setuptools import find_packages, setup
 
 pjoin = path.join
-
 name = "jupyterlab_email"
 here = path.abspath(path.dirname(__file__))
-jshere = path.join(here, "js")
-version = get_version(pjoin(here, name, "_version.py"))
+jshere = path.abspath(pjoin(path.dirname(__file__), "js"))
 
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read().replace("\r\n", "\n")
@@ -29,48 +21,52 @@ requires = [
     "python-magic>=0.4.15",
 ]
 
-dev_requires = requires + [
-    "black>=20.",
-    "bump2version>=1.0.0",
-    "flake8>=3.7.8",
-    "flake8-black>=0.2.1",
-    "jupyter_packaging",
-    "mock",
+requires_test = [
     "pytest>=4.3.0",
     "pytest-cov>=2.6.1",
-    "Sphinx>=1.8.4",
-    "sphinx-markdown-builder>=0.5.2",
 ]
 
-
-data_spec = [
-    # Lab extension installed by default:
-    (
-        "share/jupyter/labextensions/jupyterlab_email",
-        "jupyterlab_email/labextension",
-        "**",
-    ),
-    # Config to enable server extension by default:
-    ("etc/jupyter/jupyter_server_config.d", "jupyter-config", "*.json"),
-]
-
-
-cmdclass = create_cmdclass("js", data_files_spec=data_spec)
-cmdclass["js"] = combine_commands(
-    install_npm(jshere, build_cmd="build:all"),
-    ensure_targets(
-        [
-            pjoin(jshere, "lib", "index.js"),
-            pjoin(jshere, "style", "index.css"),
-            pjoin(here, "jupyterlab_email", "labextension", "package.json"),
-        ]
-    ),
+requires_dev = (
+    requires
+    + requires_test
+    + [
+        "black>=20.8b1",
+        "bump2version>=1.0.0",
+        "check-manifest",
+        "flake8>=3.7.8",
+        "flake8-black>=0.2.1",
+        "jupyter_packaging",
+        "Sphinx>=1.8.4",
+        "sphinx-markdown-builder>=0.5.2",
+    ]
 )
 
+ext_path = pjoin(name, "extension")
+lab_path = pjoin(name, "labextension")
+
+# Representative files that should exist after a successful build
+jstargets = [
+    pjoin(jshere, "lib", "index.js"),
+]
+
+data_spec = [
+    (
+        "share/jupyter/labextensions/jupyterlab_email",
+        lab_path,
+        "**",
+    ),
+    ("etc/jupyter/jupyter_server_config.d", ext_path, "*.json"),
+]
+
+ensured_targets = [
+    pjoin("jupyterlab_email", "labextension", "package.json"),
+]
+
+builder = npm_builder(build_cmd="build", path=jshere)
 
 setup(
     name=name,
-    version=version,
+    version="0.2.4",
     description="Sending emails from JupyterLab",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -79,7 +75,7 @@ setup(
     author_email="t.paine154@gmail.com",
     license="Apache 2.0",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
@@ -88,16 +84,23 @@ setup(
         "Framework :: Jupyter",
         "Framework :: Jupyter :: JupyterLab",
     ],
-    cmdclass=cmdclass,
-    keywords="jupyter jupyterlab",
+    platforms="Linux, Mac OS X, Windows",
+    keywords=["Jupyter", "Jupyterlab", "Email"],
+    cmdclass=wrap_installers(
+        post_develop=builder, pre_dist=builder, ensured_targets=ensured_targets
+    ),
+    data_files=get_data_files(data_spec),
     packages=find_packages(
         exclude=[
             "tests",
         ]
     ),
     install_requires=requires,
+    test_suite="jupyterlab_autoversion.tests",
+    tests_require=requires_test,
     extras_require={
-        "dev": dev_requires,
+        "dev": requires_dev,
+        "develop": requires_dev,
     },
     include_package_data=True,
     zip_safe=False,

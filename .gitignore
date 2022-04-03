@@ -172,3 +172,5 @@ python_junit.xml
 Untitled*.ipynb
 Untitled*.html
 output*.png
+jupyterlab_email/labextension
+
