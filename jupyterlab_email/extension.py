@@ -2,7 +2,7 @@ import os
 import os.path
 import logging
 from getpass import getpass
-from notebook.utils import url_path_join
+from jupyter_server.utils import url_path_join
 from .handlers import EmailHandler, EmailsListHandler
 
 

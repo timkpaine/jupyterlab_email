@@ -4,7 +4,7 @@ import os.path
 import logging
 import tornado.escape
 import tornado.web
-from notebook.base.handlers import IPythonHandler
+from jupyter_server.base.handlers import JupyterHandler
 from ._email import make_email, email as email_smtp
 
 
@@ -34,7 +34,7 @@ def get_template(type, code, template, handler, user_template=""):
             return handler.templates["email"]
 
 
-class EmailHandler(IPythonHandler):
+class EmailHandler(JupyterHandler):
     def initialize(
         self,
         emails=None,
@@ -146,7 +146,7 @@ class EmailHandler(IPythonHandler):
         raise Exception("Email not found!")
 
 
-class EmailsListHandler(IPythonHandler):
+class EmailsListHandler(JupyterHandler):
     def initialize(
         self,
         emails=None,
