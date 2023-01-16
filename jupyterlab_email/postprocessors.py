@@ -34,7 +34,6 @@ def pivot_pandas_to_excel(
     """
     tables = soup.findAll("table")
     for table in tables:
-
         # delete second row (empty in pivot table)
         table.thead.findChildren("tr")[1].decompose()
         new_body = Tag(name="tbody")
