@@ -27,7 +27,17 @@ with open(os.path.join(os.path.dirname(__file__), "templates", "error.tpl"), "r"
     _ERROR_TEMPLATE = fp.read()
 
 
-def run(to="html", name="", in_="", template="", execute=False, execute_timeout=600):
+def run(
+    to="html",
+    name="",
+    in_="",
+    template="",
+    execute=False,
+    execute_timeout=600,
+    logger=None,
+):
+    logger = logger or logging
+
     # write notebook string to disk
     _dir = tempfile.mkdtemp()
     inname = os.path.join(_dir, name)
@@ -109,7 +119,7 @@ def run(to="html", name="", in_="", template="", execute=False, execute_timeout=
             return ret, 0
 
     except Exception:
-        logging.critical("Exception: \n" + traceback.format_exc())
+        logger.critical("Exception: \n" + traceback.format_exc())
         return (
             "<html><h1>Notebook Run error has occurred - see raw log for details</h1></html>",
             1,
