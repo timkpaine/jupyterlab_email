@@ -44,6 +44,7 @@ class EmailHandler(JupyterHandler):
         footers=None,
         signatures=None,
         postprocessors=None,
+        logger=None,
     ):
         self.emails = emails
         self.templates = templates
@@ -52,6 +53,7 @@ class EmailHandler(JupyterHandler):
         self.footers = footers
         self.signatures = signatures
         self.postprocessors = postprocessors
+        self.logger = logger or logging
 
     @tornado.web.authenticated
     def post(self):
@@ -89,7 +91,7 @@ class EmailHandler(JupyterHandler):
             elif also_attach == "both":
                 also_attach = "html"
 
-        logging.critical("converting to <%s> with template <%s>" % (type, template))
+        self.logger.critical("converting to <%s> with template <%s>" % (type, template))
         path = os.path.join(os.getcwd(), body.get("path"))
         model = body.get("model")
 
@@ -101,19 +103,20 @@ class EmailHandler(JupyterHandler):
                     to = to.split(",")
 
                 message, error = make_email(
-                    path,
-                    model,
-                    account["username"] + "@" + account["domain"],
-                    type,
-                    template,
-                    code,
-                    subject,
-                    header,
-                    footer or signature,
-                    also_attach,
-                    attach_pdf_template,
-                    attach_html_template,
-                    postprocessor,
+                    path=path,
+                    model=model,
+                    from_=account["username"] + "@" + account["domain"],
+                    type=type,
+                    template=template,
+                    code=code,
+                    subject=subject,
+                    header=header,
+                    footer=footer or signature,
+                    also_attach=also_attach,
+                    also_attach_pdf_template=attach_pdf_template,
+                    also_attach_html_template=attach_html_template,
+                    postprocessor=postprocessor,
+                    logger=self.logger,
                 )
                 if error:
                     # set "to" to be "from"
@@ -130,13 +133,14 @@ class EmailHandler(JupyterHandler):
                     )
                 else:
                     r = email_smtp(
-                        message,
-                        to,
-                        account["username"],
-                        account["password"],
-                        account["domain"],
-                        account["smtp"],
-                        account["port"],
+                        message=message,
+                        to=to,
+                        username=account["username"],
+                        password=account["password"],
+                        domain=account["domain"],
+                        host=account["smtp"],
+                        port=account["port"],
+                        logger=self.logger,
                     )
                 if error:
                     self.set_status(500)
@@ -156,6 +160,7 @@ class EmailsListHandler(JupyterHandler):
         footers=None,
         signatures=None,
         postprocessors=None,
+        logger=None,
     ):
         self.emails = emails
         self.templates = templates
@@ -164,6 +169,7 @@ class EmailsListHandler(JupyterHandler):
         self.footers = footers
         self.signatures = signatures
         self.postprocessors = postprocessors
+        self.logger = logger or logging
 
     @tornado.web.authenticated
     def get(self):

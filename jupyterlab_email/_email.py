@@ -24,6 +24,7 @@ def make_email(
     also_attach_html_template="",
     postprocessor=None,
     postprocessor_kwargs=None,
+    logger=None,
 ):
     """
     path        : path to notebook
@@ -42,6 +43,8 @@ def make_email(
     name = path.rsplit("/", 1)[1].rsplit(".", 1)[0]
     model = nbformat.writes(nbformat.reads(json.dumps(model), 4))
 
+    logger = logger or logging
+
     if type == "email":
         type_to = "html"
     elif type == "html attachment":
@@ -51,7 +54,7 @@ def make_email(
     else:
         raise Exception("Type not recognized")
 
-    nb, error = run(type_to, name, model, template)
+    nb, error = run(to=type_to, name=name, in_=model, template=template, logger=logger)
 
     if error:
         message = emails.html(
@@ -182,7 +185,7 @@ def make_email(
     return message, 0
 
 
-def email(message, to, username, password, domain, host, port):
+def email(message, to, username, password, domain, host, port, logger=None):
     """
     to          : who to send notebook to
     username    : email account username
@@ -191,6 +194,7 @@ def email(message, to, username, password, domain, host, port):
     host        : smtp host
     port        : smtp port
     """
+    logger = logger or logging
     r = message.send(
         to=to,
         smtp={
@@ -202,6 +206,6 @@ def email(message, to, username, password, domain, host, port):
         },
     )
     if r.status_code != 250:
-        logging.critical(r)
+        logger.critical(r)
         raise Exception("Email exception! Check username and password")
     return r
