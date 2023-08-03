@@ -1,3 +1,104 @@
 [build-system]
-requires = ["setuptools", "wheel", "jupyter-packaging", "jupyterlab>=3"]
-build-backend = "setuptools.build_meta"
+requires = [
+    "hatchling>=1.3.1",
+    "jupyterlab>=4,<5",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "jupyterlab_email"
+description = "Sending emails from JupyterLab"
+version = "0.2.4"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.7"
+authors = [
+    { name = "the jupyterlab_email authors" },
+]
+keywords = [
+    "Jupyter",
+    "JupyterLab",
+    "Templates",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Jupyter",
+    "Framework :: Jupyter :: JupyterLab",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: Apache Software License",
+]
+dependencies = [
+    "beautifulsoup4>=4.9.1",
+    "emails>=0.5.15",
+    "ipython>=7.2.0",
+    "jupyterlab>=4,<5",
+    "pandas>=0.23.4",
+    "python-magic>=0.4.15",
+]
+
+[project.optional-dependencies]
+develop = [
+    "black>=23",
+    "check-manifest",
+    "ruff",
+    "pytest",
+    "pytest-cov",
+]
+test = [
+    "pytest",
+    "pytest-cov",
+]
+
+[project.urls]
+Repository = "https://github.com/timkpaine/jupyterlab_email"
+Homepage = "https://github.com/timkpaine/jupyterlab_email"
+
+[tool.check-manifest]
+ignore = [
+	"jupyterlab_email/labextension/**",
+	"js/**"
+]
+
+[tool.hatch.build]
+artifacts = [
+    "jupyterlab_email/labextension"
+]
+
+[tool.hatch.build.targets.wheel.shared-data]
+"jupyterlab_email/labextension" = "share/jupyter/labextensions/jupyterlab_email"
+"jupyterlab_email/extension/install.json" = "share/jupyter/labextensions/jupyterlab_email/install.json"
+"jupyterlab_email/extension/jupyterlab_email.json" = "etc/jupyter/jupyter_server_config.d/jupyterlab_email.json"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    ".github",
+    "docs",
+]
+
+[tool.hatch.build.hooks.jupyter-builder]
+build-function = "hatch_jupyter_builder.npm_builder"
+ensured-targets = [
+    "jupyterlab_email/labextension/package.json",
+]
+skip-if-exists = [
+    "jupyterlab_email/labextension/package.json",
+]
+dependencies = [
+    "hatch-jupyter-builder>=0.5.0",
+]
+
+[tool.hatch.build.hooks.jupyter-builder.build-kwargs]
+path = "js"
+build_cmd = "build"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401", "F403"]

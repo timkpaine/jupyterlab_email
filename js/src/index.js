@@ -350,7 +350,7 @@ function activate(app, docManager, palette, restorer, mainMenu, browser) {
                   `${PageConfig.getBaseUrl()}email/run`,
                   {},
                   {also_attach, code, email, folder, footer, header, model, path, postprocessor, signature, subject, template, to, type, user_template},
-                  {timeout: 30000}
+                  {timeout: 30000},
                 ).then(
                   // eslint-disable-next-line no-shadow
                   (res) => {
@@ -370,7 +370,7 @@ function activate(app, docManager, palette, restorer, mainMenu, browser) {
                         resolve();
                       });
                     }
-                  }
+                  },
                 );
               });
             });

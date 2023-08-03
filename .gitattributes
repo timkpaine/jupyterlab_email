@@ -1,5 +1,5 @@
 docs/* linguist-documentation
-jupyterlab_email/templates/* linguist-documentation
+
 *.ipynb linguist-documentation
 
 *.js text eol=lf
