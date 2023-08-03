@@ -1,3 +1,4 @@
+import os
 import json
 import emails
 import base64
@@ -40,7 +41,7 @@ def make_email(
     also_attach : also attach pdf/html/both
     postprocessor : run postprocessor on soup
     """
-    name = path.rsplit("/", 1)[1].rsplit(".", 1)[0]
+    name = path.rsplit(os.pathsep, 1)[1].rsplit(".", 1)[0]
     model = nbformat.writes(nbformat.reads(json.dumps(model), 4))
 
     logger = logger or logging
