@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab_email",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "Sending emails from JupyterLab",
   "author": "Tim Paine",
   "license": "Apache-2.0",
