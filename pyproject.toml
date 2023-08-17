@@ -8,7 +8,7 @@ build-backend = "hatchling.build"
 [project]
 name = "jupyterlab_email"
 description = "Sending emails from JupyterLab"
-version = "0.3.0"
+version = "0.3.1"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.7"
