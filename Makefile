@@ -15,10 +15,10 @@ install:  ## install to site-packages
 ###########
 # Testing #
 ###########
-testpy: ## Clean and Make unit tests
+testpy: ## clean and Make unit tests
 	python -m pytest -v jupyterlab_email/tests --junitxml=junit.xml --cov=jupyterlab_email --cov-report=xml:.coverage.xml --cov-branch --cov-fail-under=15 --cov-report term-missing
 
-testjs: ## Clean and Make js tests
+testjs: ## clean and Make js tests
 	cd js; yarn test
 
 test: tests
@@ -27,18 +27,16 @@ tests: testpy testjs ## run the tests
 ###########
 # Linting #
 ###########
-lintpy:  ## Black/flake8 python
+lintpy:  ## lint python with ruff
 	python -m ruff jupyterlab_email setup.py
-	python -m black --check jupyterlab_email setup.py
 
 lintjs:  ## ESlint javascript
 	cd js; yarn lint
 
 lint: lintpy lintjs  ## run linter
 
-fixpy:  ## Black python
-	python -m ruff jupyterlab_email setup.py --fix
-	python -m black jupyterlab_email/ setup.py
+fixpy:  ## autoformat python with ruff
+	python -m ruff format jupyterlab_email setup.py
 
 fixjs:  ## ESlint Autofix JS
 	cd js; yarn fix
