@@ -58,9 +58,7 @@ def make_email(
     nb, error = run(to=type_to, name=name, in_=model, template=template, logger=logger)
 
     if error:
-        message = emails.html(
-            charset="utf-8", subject=subject, html=nb, mail_from=from_
-        )
+        message = emails.html(charset="utf-8", subject=subject, html=nb, mail_from=from_)
         return message, error
 
     if not nb:
@@ -75,9 +73,7 @@ def make_email(
 
     if error:
         # from pdf or html conversion specifically
-        message = emails.html(
-            charset="utf-8", subject=subject, html=nb, mail_from=from_
-        )
+        message = emails.html(charset="utf-8", subject=subject, html=nb, mail_from=from_)
         return message, error
 
     if type == "email":
@@ -88,9 +84,7 @@ def make_email(
             item.decompose()
 
         # strip matplotlib base outs
-        for item in soup.find_all(
-            "div", class_="output_text output_subarea output_execute_result"
-        ):
+        for item in soup.find_all("div", class_="output_text output_subarea output_execute_result"):
             for c in item.contents:
                 if "&lt;matplotlib" in str(c):
                     item.decompose()
@@ -109,9 +103,7 @@ def make_email(
         for i, img in enumerate(imgs):
             if not img.get("localdata"):
                 continue
-            imgs_to_attach[
-                img.get("cell_id") + "_" + str(i) + ".png"
-            ] = base64.b64decode(img.get("localdata"))
+            imgs_to_attach[img.get("cell_id") + "_" + str(i) + ".png"] = base64.b64decode(img.get("localdata"))
             img["src"] = "cid:" + img.get("cell_id") + "_" + str(i) + ".png"
             # encoders.encode_base64(part)
             del img["localdata"]
@@ -152,9 +144,7 @@ def make_email(
 
         # assemble email soup
         soup = str(soup)
-        message = emails.html(
-            charset="utf-8", subject=subject, html=soup, mail_from=from_
-        )
+        message = emails.html(charset="utf-8", subject=subject, html=soup, mail_from=from_)
 
         for img, data in iteritems(imgs_to_attach):
             message.attach(filename=img, content_disposition="inline", data=data)

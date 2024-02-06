@@ -1,9 +1,7 @@
 from bs4 import Tag, NavigableString
 
 
-def pivot_pandas_to_excel(
-    soup, show_intermediate_breakdown=False, show_total_breakdown=False
-):
+def pivot_pandas_to_excel(soup, show_intermediate_breakdown=False, show_total_breakdown=False):
     """pandas style pivot to excel style pivot formatting for outlook/html
 
     This function is meant to be provided to the email functionality as a postprocessor.
@@ -41,9 +39,7 @@ def pivot_pandas_to_excel(
 
         # max number of columns so table is even
         num_columns_max = max(len(row.findAll()) for row in table.tbody.findAll("tr"))
-        num_headers_max = max(
-            len(row.findAll("th")) for row in table.tbody.findAll("tr")
-        )
+        num_headers_max = max(len(row.findAll("th")) for row in table.tbody.findAll("tr"))
 
         # for special case where we delete the summation rows
         last = False
@@ -87,9 +83,7 @@ def pivot_pandas_to_excel(
                                 attrs={
                                     "class": "empty_pivot_row_first",
                                     "style": "margin-left:"
-                                    + str(
-                                        10 * (num_headers_max - len(headers) + indent)
-                                    )
+                                    + str(10 * (num_headers_max - len(headers) + indent))
                                     + "px;",
                                 },
                             )
@@ -99,9 +93,7 @@ def pivot_pandas_to_excel(
                                 attrs={
                                     "class": "empty_pivot_row",
                                     "style": "margin-left:"
-                                    + str(
-                                        10 * (num_headers_max - len(headers) + indent)
-                                    )
+                                    + str(10 * (num_headers_max - len(headers) + indent))
                                     + "px;",
                                 },
                             )
@@ -114,9 +106,7 @@ def pivot_pandas_to_excel(
                         for j in range(num_columns_max - 1):
                             new_row.insert(
                                 j + 1,
-                                Tag(
-                                    name="td", attrs={"class": "empty_pivot_row_first"}
-                                ),
+                                Tag(name="td", attrs={"class": "empty_pivot_row_first"}),
                             ) if first_header else new_row.insert(
                                 j + 1,
                                 Tag(name="td", attrs={"class": "empty_pivot_row"}),

@@ -176,15 +176,9 @@ class EmailsListHandler(JupyterHandler):
         ret = {}
         ret["emails"] = [_["name"] for _ in self.emails]
         ret["templates"] = [_ for _ in self.templates]
-        ret["user_templates"] = (
-            [""] + [_ for _ in self.user_templates] if self.user_templates else []
-        )
+        ret["user_templates"] = [""] + [_ for _ in self.user_templates] if self.user_templates else []
         ret["headers"] = [""] + [_ for _ in self.headers] if self.headers else []
         ret["footers"] = [""] + [_ for _ in self.footers] if self.footers else []
-        ret["signatures"] = (
-            [""] + [_ for _ in self.signatures] if self.signatures else []
-        )
-        ret["postprocessors"] = (
-            [""] + [_ for _ in self.postprocessors] if self.postprocessors else []
-        )
+        ret["signatures"] = [""] + [_ for _ in self.signatures] if self.signatures else []
+        ret["postprocessors"] = [""] + [_ for _ in self.postprocessors] if self.postprocessors else []
         self.finish(json.dumps(ret))
