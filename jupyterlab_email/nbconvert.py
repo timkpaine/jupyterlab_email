@@ -57,9 +57,7 @@ def run(
 
     # reexecute if needed
     if execute:
-        argv.extend(
-            ["--execute", "--ExecutePreprocessor.timeout=" + str(execute_timeout)]
-        )
+        argv.extend(["--execute", "--ExecutePreprocessor.timeout=" + str(execute_timeout)])
 
     # pass in template arg
     if template:
@@ -76,9 +74,7 @@ def run(
             error = error.decode("ascii")
 
             # extract out the cell error
-            m = re.search(
-                ".*CellExecutionError:(?P<CellError>(.*\n)*)", error, flags=re.MULTILINE
-            )
+            m = re.search(".*CellExecutionError:(?P<CellError>(.*\n)*)", error, flags=re.MULTILINE)
 
             g = m.groupdict()
 
@@ -92,9 +88,7 @@ def run(
             for color, reg in _COLOR_CODES.items():
                 err = re.sub(
                     reg,
-                    '<span style="color: {color}">{err}</span> '.format(
-                        color=color, err=err
-                    ),
+                    '<span style="color: {color}">{err}</span> '.format(color=color, err=err),
                 )
 
             # remove and closers
