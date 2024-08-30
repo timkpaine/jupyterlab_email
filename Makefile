@@ -28,7 +28,8 @@ tests: testpy testjs ## run the tests
 # Linting #
 ###########
 lintpy:  ## lint python with ruff
-	python -m ruff jupyterlab_email setup.py
+	python -m ruff check jupyterlab_email
+	python -m ruff format --check jupyterlab_email
 
 lintjs:  ## ESlint javascript
 	cd js; yarn lint
@@ -36,7 +37,8 @@ lintjs:  ## ESlint javascript
 lint: lintpy lintjs  ## run linter
 
 fixpy:  ## autoformat python with ruff
-	python -m ruff format jupyterlab_email setup.py
+	python -m ruff check --fix jupyterlab_email
+	python -m ruff format jupyterlab_email
 
 fixjs:  ## ESlint Autofix JS
 	cd js; yarn fix
