@@ -6264,9 +6264,9 @@ makeerror@1.0.12:
     tmpl "1.0.5"
 
 markdown-to-jsx@^7.2.1:
-  version "7.3.1"
-  resolved "https://registry.yarnpkg.com/markdown-to-jsx/-/markdown-to-jsx-7.3.1.tgz#11bfd95573d3ada43c149d03e8cf81c8a8f7773d"
-  integrity sha512-UQm7q0Pj/OjNoVbSJWb81qQFFZlZluOdn5fAb/GP5ku9LiBvCDqu8laEDsTFXweYQeLxnTexNcjRZdyOW+souw==
+  version "7.5.0"
+  resolved "https://registry.yarnpkg.com/markdown-to-jsx/-/markdown-to-jsx-7.5.0.tgz#42ece0c71e842560a7d8bd9f81e7a34515c72150"
+  integrity sha512-RrBNcMHiFPcz/iqIj0n3wclzHXjwS7mzjBNWecKKVhNTIxQepIix6Il/wZCn2Cg5Y1ow2Qi84+eJrryFRWBEWw==
 
 memorystream@^0.3.1:
   version "0.3.1"
